@@ -1,6 +1,6 @@
 on:
     push:
-        branches: [main, push_starters]
+        branches: [main, push_starters, platform]
 jobs:
     deliver:
         strategy:
@@ -36,8 +36,8 @@ jobs:
                 cp $GITHUB_WORKSPACE/user_stories/${{ matrix.preset }}.md README.md
                 git init
                 git add .
-                git config user.email "marvin@aspect.build"
-                git config user.name "Marvin, the Aspect bot"
+                git config user.email "git@nocentre.net"
+                git config user.name "Git, the Delivery bot"
                 git commit -a -m "template"
                 echo "dir=$PWD" >> $GITHUB_OUTPUT
             - name: Convert preset name to deploy secret name
@@ -51,5 +51,4 @@ jobs:
               run: |
                 eval $(ssh-agent -s)
                 ssh-add - <<< '${{ secrets[steps.which-secret.outputs.secret-name] }}'
-                git push  --force git@github.com:bazel-starters/${{ matrix.preset }}.git HEAD:main
-        
+                git push  --force git@github.com:BlueCentre/${{ matrix.preset }}.git HEAD:main

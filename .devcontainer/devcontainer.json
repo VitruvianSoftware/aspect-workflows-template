@@ -1,0 +1,21 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/universal:2",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode-remote.remote-containers"
+      ]
+    }
+  },
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2.12.4": {},
+		"ghcr.io/devcontainers-community/features/bazel:1": {},
+		"ghcr.io/devcontainers-extra/features/gh-cli:1": {},
+		"ghcr.io/devcontainers-extra/features/kind:1": {},
+		"ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+    "ghcr.io/devcontainers-extra/features/tailscale:1": {}
+	},
+	"postCreateCommand": "/bin/bash -ex ./.devcontainer/postCreateCommand.sh > postCreateCommand.log"
+}

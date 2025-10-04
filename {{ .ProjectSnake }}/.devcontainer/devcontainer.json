@@ -1,8 +1,40 @@
 {
+  // https://containers.dev/implementors/json_reference/
   "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
-  "name": "Dev image with direnv and Bazel",
+  "name": "Dev image with direnv, Bazel, Skaffold, Docker, Kind, Gcloud, Pulumi, Terraform, etc.",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile.kitchen-sink" // Swap with Dockerfile for minimum Codespace
+  },
+  "privileged": "true",
+  "containerEnv": {
+    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}",
+    "GITHUB_USER": "${localEnv:GITHUB_USER}"
+  },
+  "runArgs": ["--name=blueprint-codespace"],
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "features": {
+		// "ghcr.io/devcontainers/features/docker-in-docker:2.12.4": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "enableNonRootDocker": "true"
+    },
+		"ghcr.io/devcontainers-community/features/bazel:1": {},
+		"ghcr.io/devcontainers-extra/features/gh-cli:1": {},
+		"ghcr.io/devcontainers-extra/features/kind:1": {},
+		"ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+    "ghcr.io/devcontainers-extra/features/tailscale:1": {}
+  },
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "BazelBuild.vscode-bazel",
+        "google.gemini-cli-vscode-ide-companion",
+        "googlecloudtools.cloudcode",
+        "ms-azuretools.vscode-containers"
+      ]
+    }
   },
   "postCreateCommand": "direnv allow; bazel run tools:bazel_env || true"
 }

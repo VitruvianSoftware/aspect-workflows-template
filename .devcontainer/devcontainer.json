@@ -1,17 +1,24 @@
 {
+  // https://containers.dev/implementors/json_reference/
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
 	"image": "mcr.microsoft.com/devcontainers/universal:2",
   "customizations": {
     "vscode": {
       "extensions": [
+        "GitHub.copilot",
+        "github.vscode-github-actions",
+        "google.gemini-cli-vscode-ide-companion",
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-vscode-remote.remote-containers"
+        "ms-vscode-remote.remote-containers",
+        "MermaidChart.vscode-mermaid-chart"
       ]
     }
   },
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2.12.4": {},
 		"ghcr.io/devcontainers-community/features/bazel:1": {},
+    "ghcr.io/devcontainers-extra/features/devcontainers-cli:1": {},
 		"ghcr.io/devcontainers-extra/features/gh-cli:1": {},
 		"ghcr.io/devcontainers-extra/features/kind:1": {},
 		// "ghcr.io/devcontainers-extra/features/pre-commit:2": {}, // uncomment when/if we have precommit for this codespace

@@ -1,6 +1,6 @@
 on:
     push:
-        branches: [main, push_starters, platform]
+        branches: [main, push_starters, platform, platform-v2.0]
 jobs:
     deliver:
         strategy:
@@ -18,7 +18,7 @@ jobs:
                     - ruby
                     - shell
                     - scala
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
             - uses: jaxxstorm/action-install-gh-release@6096f2a2bbfee498ced520b6922ac2c06e990ed2 # v2.1.0
@@ -48,7 +48,14 @@ jobs:
                 echo "secret-name=STARTER_DEPLOY_${CLEAN^^}" >> "$GITHUB_OUTPUT"
             - name: Force-Push to Starter repo
               working-directory: ${{ steps.scaffold.outputs.dir }}
+              env:
+                SSH_KEY: ${{ secrets[steps.which-secret.outputs.secret-name] }}
+                SECRET_NAME: ${{ steps.which-secret.outputs.secret-name }}
               run: |
+                if [ -z "$SSH_KEY" ]; then
+                  echo "::error::Secret $SECRET_NAME is missing or empty. Please create it in GitHub Settings."
+                  exit 1
+                fi
                 eval $(ssh-agent -s)
-                ssh-add - <<< '${{ secrets[steps.which-secret.outputs.secret-name] }}'
+                ssh-add - <<< "$SSH_KEY"
                 git push  --force git@github.com:BlueCentre/${{ matrix.preset }}.git HEAD:main

@@ -1,0 +1,576 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+{{- if .Computed.kitchen_sink }}
+  name: bazel-kitchen-sink
+  title: Bazel Polyglot Monorepo Template
+  description: Multi-language Bazel monorepo with all supported languages and features
+{{- else if .Computed.minimal }}
+  name: bazel-minimal
+  title: Bazel Minimal Monorepo Template
+  description: Minimal Bazel monorepo setup with no language-specific features
+{{- else if .Computed.javascript }}
+  name: bazel-javascript
+  title: Bazel JavaScript & TypeScript Monorepo Template
+  description: Bazel monorepo for JavaScript and TypeScript projects
+{{- else if .Computed.python }}
+  name: bazel-python
+  title: Bazel Python Monorepo Template
+  description: Bazel monorepo for Python projects
+{{- else if .Computed.go }}
+  name: bazel-go
+  title: Bazel Go Monorepo Template
+  description: Bazel monorepo for Go projects
+{{- else if .Computed.java }}
+  name: bazel-java
+  title: Bazel Java Monorepo Template
+  description: Bazel monorepo for Java projects
+{{- else if .Computed.kotlin }}
+  name: bazel-kotlin
+  title: Bazel Kotlin Monorepo Template
+  description: Bazel monorepo for Kotlin projects
+{{- else if .Computed.cpp }}
+  name: bazel-cpp
+  title: Bazel C & C++ Monorepo Template
+  description: Bazel monorepo for C and C++ projects
+{{- else if .Computed.rust }}
+  name: bazel-rust
+  title: Bazel Rust Monorepo Template
+  description: Bazel monorepo for Rust projects
+{{- else if .Computed.shell }}
+  name: bazel-shell
+  title: Bazel Shell Script Monorepo Template
+  description: Bazel monorepo for Shell script projects
+{{- else }}
+  name: unknown
+  title: Unknown
+  description: Unknown
+{{- end }}
+  tags:
+    - bazel
+    - aspect-workflows
+    - monorepo
+{{- if .Computed.kitchen_sink }}
+    - multi-language
+{{- end }}
+{{- if .Computed.javascript }}
+    - javascript
+    - typescript
+{{- end }}
+{{- if .Computed.python }}
+    - python
+{{- end }}
+{{- if .Computed.go }}
+    - go
+{{- end }}
+{{- if .Computed.java }}
+    - java
+{{- end }}
+{{- if .Computed.kotlin }}
+    - kotlin
+{{- end }}
+{{- if .Computed.cpp }}
+    - cpp
+{{- end }}
+{{- if .Computed.rust }}
+    - rust
+{{- end }}
+{{- if .Computed.shell }}
+    - shell
+{{- end }}
+  links:
+{{- if .Computed.kitchen_sink }}
+    - url: https://github.com/BlueCentre/backstage-kitchen-sink
+{{- else if .Computed.minimal }}
+    - url: https://github.com/BlueCentre/backstage-minimal
+{{- else if .Computed.javascript }}
+    - url: https://github.com/BlueCentre/backstage-javascript
+{{- else if .Computed.python }}
+    - url: https://github.com/BlueCentre/backstage-python
+{{- else if .Computed.go }}
+    - url: https://github.com/BlueCentre/backstage-go
+{{- else if .Computed.java }}
+    - url: https://github.com/BlueCentre/backstage-java
+{{- else if .Computed.kotlin }}
+    - url: https://github.com/BlueCentre/backstage-kotlin
+{{- else if .Computed.cpp }}
+    - url: https://github.com/BlueCentre/backstage-cpp
+{{- else if .Computed.rust }}
+    - url: https://github.com/BlueCentre/backstage-rust
+{{- else if .Computed.shell }}
+    - url: https://github.com/BlueCentre/backstage-shell
+{{- else }}
+    - url: https://github.com/BlueCentre/unknown
+{{- end }}
+      title: Source
+      icon: github
+    - url: https://github.com/aspect-build/aspect-cli
+      title: Aspect CLI
+      icon: github
+    - url: https://docs.aspect.build/
+      title: Documentation
+      icon: docs
+
+spec:
+  owner: team-platform
+  type: service
+  
+  parameters:
+    - title: Project Information
+      required:
+        - name
+        - owner
+      properties:
+        name:
+          title: Project Name
+          type: string
+          description: Unique name for your project (will be used for repository name)
+          pattern: '^[a-z0-9-]+$'
+          ui:autofocus: true
+          ui:options:
+            rows: 1
+        description:
+          title: Description
+          type: string
+          description: A brief description of your project
+          ui:options:
+            rows: 3
+        owner:
+          title: Owner
+          type: string
+          description: Team or user who owns this project
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: [Group, User]
+            # allowedKinds:
+            #   - Group
+            #   - User
+        # wifProjectNumber:
+        #   title: What is the Workload identity project number?
+        #   type: string
+        #   ui:hint: Get the project number by running gcloud projects list --filter="PROJECT_ID=[your-project-id]" --format="value(PROJECT_NUMBER)"
+        # wifPoolName:
+        #   title: What is your workload identity pool name?
+        #   type: string
+        # wifProviderName:
+        #  title: what is your Workload Identity provider name?
+        #  type: string
+        # wifServiceAccount: 
+        #   title: what is the service account that can be used to federate to the WIF pool?
+        #   type: string
+    # - title: Setup your Artifact registry repository
+    #   properties:
+    #     arRepo: 
+    #       title: Enter the Artifact registry repository name
+    #       type: string
+    #     arLocation: 
+    #       title: Enter the Artifact registry location
+    #       type: string
+    #       default: us
+    #       enum:
+    #       - us
+    #       - europe
+    #       - asia
+    #       - us-west1
+    #       - us-west2
+    #       - us-west3
+    #       - us-west4
+    #       - us-central1
+    #       - us-east1
+    #       - us-east4
+    #       - us-east5
+    #       - us-south1
+    #       - northamerica-northeast1
+    #       - northamerica-northeast2
+    #       - southamerica-west1
+    #       - southamerica-east1
+    #       - europe-west2
+    #       - europe-west1
+    #       - europe-west4
+    #       - europe-west6
+    #       - europe-west3
+    #       - europe-north1
+    #       - europe-central2
+    #       - europe-west8
+    #       - europe-southwest1
+    #       - europe-west9
+    #       - europe-west12
+    #       - europe-west10
+    #       - asia-south1
+    #       - asia-southeast1
+    #       - asia-southeast2
+    #       - asia-east2
+    #       - asia-east1
+    #       - asia-northeast1
+    #       - asia-northeast2
+    #       - australia-southeast1
+    #       - australia-southeast2
+    #       - asia-northeast3
+    #       - me-west1
+    #       - me-central1
+    #       - me-central2
+    #       - africa-south1
+    #       enumNames:
+    #       - 'US Multi-region (us)'
+    #       - 'Europe Multi-region (europe)'
+    #       - 'Asia Multi-region (asia)'
+    #       - 'Oregon (us-west1)'
+    #       - 'Los Angeles (us-west2)'
+    #       - 'Salt Lake City (us-west3)'
+    #       - 'Las Vegas (us-west4)'
+    #       - 'Iowa (us-central1)'
+    #       - 'South Carolina (us-east1)'
+    #       - 'N. Virginia (us-east4)'
+    #       - 'Columbus (us-east5)'
+    #       - 'Dallas (us-south1)'
+    #       - 'Montréal (northamerica-northeast1)'
+    #       - 'Toronto (northamerica-northeast2)'
+    #       - 'Santiago (southamerica-west1)'
+    #       - 'São Paulo (southamerica-east1)'
+    #       - 'London (europe-west2)'
+    #       - 'Belgium (europe-west1)'
+    #       - 'Netherlands (europe-west4)'
+    #       - 'Zurich (europe-west6)'
+    #       - 'Frankfurt (europe-west3)'
+    #       - 'Finland (europe-north1)'
+    #       - 'Warsaw (europe-central2)'
+    #       - 'Milan (europe-west8)'
+    #       - 'Madrid (europe-southwest1)'
+    #       - 'Paris (europe-west9)'
+    #       - 'Turin (europe-west12)'
+    #       - 'Berlin (europe-west10)'
+    #       - 'Mumbai (asia-south1)'
+    #       - 'Singapore (asia-southeast1)'
+    #       - 'Jakarta (asia-southeast2)'
+    #       - 'Hong Kong (asia-east2)'
+    #       - 'Taiwan (asia-east1)'
+    #       - 'Tokyo (asia-northeast1)'
+    #       - 'Osaka (asia-northeast2)'
+    #       - 'Sydney (australia-southeast1)'
+    #       - 'Melbourne (australia-southeast2)'
+    #       - 'Seoul (asia-northeast3)'
+    #       - 'Tel Aviv (me-west1)'
+    #       - 'Doha (me-central1)'
+    #       - 'Dammam 7 (me-central2)'
+    #       - 'Johannesburg (africa-south1)'
+    # - title: Setup your Cloud Run service
+    #   properties:
+    #     gcpProjectId:
+    #       title: GCP Project ID
+    #       type: string
+    #       description: Enter the GCP project ID that you wish to deploy cloud run to
+    #       pattern: ^[a-z][a-z0-9-]{4,28}[a-z0-9]$
+    #     serviceName:
+    #       title: Service Name
+    #       type: string
+    #       description: Unique name of the new service
+    #       maxLength: 25
+    #       pattern: ^([a-z][a-z0-9]*)(-[a-z0-9]+)*$
+    #     serviceDescription:
+    #       title: Describe your service
+    #       type: string
+    #       ui:placeholder: My hello world application
+    #     region: 
+    #       title: Select the GCP region where you wish to host this Cloud Run service.
+    #       type: string
+    #       default: us-central1
+    #       enum:
+    #         - us-west1
+    #         - us-west2
+    #         - us-west3
+    #         - us-west4
+    #         - us-central1
+    #         - us-east1
+    #         - us-east4
+    #         - us-east5
+    #         - us-south1
+    #         - northamerica-northeast1
+    #         - northamerica-northeast2
+    #         - southamerica-west1
+    #         - southamerica-east1
+    #         - europe-west2
+    #         - europe-west1
+    #         - europe-west4
+    #         - europe-west6
+    #         - europe-west3
+    #         - europe-north1
+    #         - europe-central2
+    #         - europe-west8
+    #         - europe-southwest1
+    #         - europe-west9
+    #         - europe-west12
+    #         - europe-west10
+    #         - asia-south1
+    #         - asia-southeast1
+    #         - asia-southeast2
+    #         - asia-east2
+    #         - asia-east1
+    #         - asia-northeast1
+    #         - asia-northeast2
+    #         - australia-southeast1
+    #         - australia-southeast2
+    #         - asia-northeast3
+    #         - me-west1
+    #         - me-central1
+    #         - me-central2
+    #         - africa-south1
+    #       enumNames:
+    #         - 'Oregon (us-west1)'
+    #         - 'Los Angeles (us-west2)'
+    #         - 'Salt Lake City (us-west3)'
+    #         - 'Las Vegas (us-west4)'
+    #         - 'Iowa (us-central1)'
+    #         - 'South Carolina (us-east1)'
+    #         - 'N. Virginia (us-east4)'
+    #         - 'Columbus (us-east5)'
+    #         - 'Dallas (us-south1)'
+    #         - 'Montréal (northamerica-northeast1)'
+    #         - 'Toronto (northamerica-northeast2)'
+    #         - 'Santiago (southamerica-west1)'
+    #         - 'São Paulo (southamerica-east1)'
+    #         - 'London (europe-west2)'
+    #         - 'Belgium (europe-west1)'
+    #         - 'Netherlands (europe-west4)'
+    #         - 'Zurich (europe-west6)'
+    #         - 'Frankfurt (europe-west3)'
+    #         - 'Finland (europe-north1)'
+    #         - 'Warsaw (europe-central2)'
+    #         - 'Milan (europe-west8)'
+    #         - 'Madrid (europe-southwest1)'
+    #         - 'Paris (europe-west9)'
+    #         - 'Turin (europe-west12)'
+    #         - 'Berlin (europe-west10)'
+    #         - 'Mumbai (asia-south1)'
+    #         - 'Singapore (asia-southeast1)'
+    #         - 'Jakarta (asia-southeast2)'
+    #         - 'Hong Kong (asia-east2)'
+    #         - 'Taiwan (asia-east1)'
+    #         - 'Tokyo (asia-northeast1)'
+    #         - 'Osaka (asia-northeast2)'
+    #         - 'Sydney (australia-southeast1)'
+    #         - 'Melbourne (australia-southeast2)'
+    #         - 'Seoul (asia-northeast3)'
+    #         - 'Tel Aviv (me-west1)'
+    #         - 'Doha (me-central1)'
+    #         - 'Dammam 7 (me-central2)'
+    #         - 'Johannesburg (africa-south1)'
+    
+    #     ingress: 
+    #       type: string
+    #       title: select the ingress setting for Cloud Run.
+    #       default: all
+    #       enum:
+    #         - all
+    #         - internal-and-cloud-load-balancing
+    #         - internal
+    #       enumNames:
+    #         - All
+    #         - Internal and Cloud Load Balancing
+    #         - Internal
+
+    - title: Repository Configuration
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+               - github.com
+            requestUserCredentials:
+              secrets:
+                - USER_OAUTH_TOKEN
+            # Here's the option you can pass to the RepoUrlPicker
+            # requestUserCredentials:
+            #   secretsKey: USER_OAUTH_TOKEN
+            #   additionalScopes:
+            #     github:
+            #       - workflow:write
+            #       - repo
+
+
+{{- if not .Computed.minimal }}
+    - title: Features
+      properties:
+{{- if not .Scaffold.lint }}
+        enableLinting:
+          title: Enable Formatting and Linting
+          type: boolean
+          description: Setup format and linting using rules_lint
+          default: true
+{{- end }}
+{{- if not .Scaffold.stamp }}
+        enableStamping:
+          title: Enable Version Stamping
+          type: boolean
+          description: Setup version stamping for releases
+          default: false
+{{- end }}
+{{- if not .Scaffold.oci }}
+        enableOCI:
+          title: Enable OCI Containers
+          type: boolean
+          description: Setup OCI container builds with rules_oci
+          default: false
+{{- end }}
+        enableCodegen:
+          title: Enable Code Generation Tools
+          type: boolean
+          description: Install copier (Python), yeoman (JS), and scaffold (Go)
+          default: false
+{{- end }}
+
+###############################################################################
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: {{ "${{" }} parameters.name {{ "}}" }}
+          description: {{ "${{" }} parameters.description {{ "}}" }}
+          owner: {{ "${{" }} parameters.owner {{ "}}" }}
+          destination: {{ "${{" }} parameters.repoUrl | parseRepoUrl {{ "}}" }}
+{{- if not .Computed.minimal }}
+          languages:
+{{- if .Computed.javascript }}
+            - JavaScript & TypeScript
+{{- end }}
+{{- if .Computed.python }}
+            - Python
+{{- end }}
+{{- if .Computed.go }}
+            - Go
+{{- end }}
+{{- if .Computed.java }}
+            - Java
+{{- end }}
+{{- if .Computed.kotlin }}
+            - Kotlin
+{{- end }}
+{{- if .Computed.cpp }}
+            - C & C++
+{{- end }}
+{{- if .Computed.rust }}
+            - Rust
+{{- end }}
+{{- if .Computed.shell }}
+            - Shell (Bash)
+{{- end }}
+{{- end }}
+{{- if not .Computed.minimal }}
+{{- if not .Scaffold.lint }}
+          enableLinting: {{ "${{" }} parameters.enableLinting {{ "}}" }}
+{{- end }}
+{{- if not .Scaffold.stamp }}
+          enableStamping: {{ "${{" }} parameters.enableStamping {{ "}}" }}
+{{- end }}
+{{- if not .Scaffold.oci }}
+          enableOCI: {{ "${{" }} parameters.enableOCI {{ "}}" }}
+{{- end }}
+          enableCodegen: {{ "${{" }} parameters.enableCodegen {{ "}}" }}
+{{- end }}
+
+    # - id: fetchWorkflows
+    #   name: Install Github Workflows
+    #   action: fetch:plain
+    #   input:
+    #     url: ./cloud-run-workflows
+    #     targetPath: ./code
+
+    - id: publish
+      name: Create GitHub repo
+      action: publish:github
+      input:
+        repoUrl: {{ "${{" }} parameters.repoUrl {{ "}}" }}
+        description: {{ "${{" }} parameters.description {{ "}}" }}
+        defaultBranch: main
+        repoVisibility: private
+        # token: {{ "${{" }} secrets.USER_OAUTH_TOKEN {{ "}}" }}
+        deleteBranchOnMerge: true
+        gitCommitMessage: "Initial commit from Aspect Workflows template"
+
+    # - id: publish
+    #   name: Create GitHub repo
+    #   action: publish:github
+    #   input:
+    #     repoUrl: {{ "${{" }} parameters.repoUrl {{ "}}" }}
+    #     description: Hello World deployment for {{ "${{" }} parameters.serviceName {{ "}}" }}
+    #     sourcePath: ./code
+    #     #token: {{ "${{" }} secrets.USER_OAUTH_TOKEN {{ "}}" }}e
+    #     defaultBranch: main
+    #     repoVariables:
+    #       LANGUAGE: python
+    #       SERVICE_NAME: {{ "${{" }} parameters.serviceName {{ "}}" }}
+    #       REGION: {{ "${{" }} parameters.region {{ "}}" }}
+    #       ARTIFACT_REGISTRY_REPO: {{ "${{" }} parameters.arRepo {{ "}}" }}
+    #       ARTIFACT_REGISTRY_LOCATION: {{ "${{" }} parameters.arLocation {{ "}}" }}
+    #       PROJECT_ID: {{ "${{" }} parameters.gcpProjectId {{ "}}" }}
+    #       WIF_PROVIDER: projects/{{ "${{" }} parameters.wifProjectNumber {{ "}}" }}/locations/global/workloadIdentityPools/{{ "${{" }} parameters.wifPoolName{{ "}}" }}/providers/{{ "${{" }} parameters.wifProviderName {{ "}}" }}
+    #       WIF_SERVICE_ACCOUNT: {{ "${{" }} parameters.wifServiceAccount {{ "}}" }}
+    #     secrets:
+    #       WIF_PROVIDER: projects/{{ "${{" }} parameters.wifProjectNumber {{ "}}" }}/locations/global/workloadIdentityPools/{{ "${{" }} parameters.wifPoolName{{ "}}" }}/providers/{{ "${{" }} parameters.wifProviderName {{ "}}" }}
+    #       WIF_SERVICE_ACCOUNT: {{ "${{" }} parameters.wifServiceAccount {{ "}}" }}
+
+    - id: register
+      name: Register Component
+      action: catalog:register
+      input:
+        repoContentsUrl: {{ "${{" }} steps.publish.output.repoContentsUrl {{ "}}" }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+###############################################################################
+
+  output:
+    links:
+      - title: Repository
+        url: {{ "${{" }} steps.publish.output.remoteUrl {{ "}}" }}
+      - title: Open in Backstage
+        icon: catalog
+        entityRef: {{ "${{" }} steps.register.output.entityRef {{ "}}" }}
+    text:
+      - title: Next Steps
+        content: |
+          # Welcome to your new Aspect Workflows project! 🎉
+
+          Your repository has been created at: {{ "${{" }} steps.publish.output.remoteUrl {{ "}}" }}
+
+          ## Getting Started
+
+          1. Clone the repository:
+             ```bash
+             git clone {{ "${{" }} steps.publish.output.remoteUrl {{ "}}" }}
+             cd {{ "${{" }} parameters.name {{ "}}" }}
+             ```
+
+          2. Read the developer guide in `/README.bazel.md`
+
+          3. Setup your dev environment:
+             ```bash
+             bazel run //tools:bazel_env
+             ```
+             Note: This requires installing direnv: https://direnv.net/
+
+          4. Try out some commands:
+{{- if .Scaffold.lint }}
+             - Format: `format`
+             - Lint: `aspect lint //...`
+{{- else }}
+             - Format: `format` (if enabled)
+             - Lint: `aspect lint //...` (if enabled)
+{{- end }}
+             - Run tests: `aspect test //...`
+             - Watch mode: `ibazel run //my:devserver`
+
+          5. Add source code and run `bazel run gazelle` to generate BUILD files
+
+          ## Resources
+
+          - 🌟 Star Aspect CLI: https://github.com/aspect-build/aspect-cli
+          - 📚 Documentation: https://docs.aspect.build/
+          - 💬 Join Bazel Slack: https://slack.bazel.build (#aspect-build channel)

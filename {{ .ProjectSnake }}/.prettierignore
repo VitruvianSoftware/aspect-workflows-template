@@ -1,0 +1,4 @@
+# Prettier ignore
+{{ if .Scaffold.backstage }}
+skeleton/
+{{ end }}

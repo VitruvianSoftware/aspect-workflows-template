@@ -1,9 +1,10 @@
+{{- if .Scaffold.backstage -}}
 # Backstage catalog-info.yaml
-# See https://backstage.io/docs/features/software-catalog/descriptor-format
+# This file registers the Template itself in Backstage's catalog
+# See https://backstage.io/docs/features/software-templates/
 apiVersion: backstage.io/v1alpha1
-kind: Component
+kind: Location
 metadata:
-  # Note: {{ "{{" }} .ProjectKebab {{ "}}" }} will be replaced by scaffold with the project name
 {{- if .Computed.kitchen_sink }}
   name: kitchen-sink-generated-blueprint
 {{- else if .Computed.minimal }}
@@ -27,12 +28,43 @@ metadata:
 {{- else }}
   name: {{ .ProjectSnake }}
 {{- end }}
-  # title: Generated Kitchen-Sink Application Template
+  description: Aspect Workflows Bazel Monorepo Templates
+spec:
+  type: url
+  targets:
+    - ./template.yaml
+{{- else -}}
+# catalog-info.yaml
+# See https://backstage.io/docs/features/software-catalog/descriptor-format
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+{{- if .Computed.kitchen_sink }}
+  name: kitchen-sink-generated-blueprint
+{{- else if .Computed.minimal }}
+  name: minimal-generated-blueprint
+{{- else if .Computed.javascript }}
+  name: javascript-generated-blueprint
+{{- else if .Computed.python }}
+  name: python-generated-blueprint
+{{- else if .Computed.go }}
+  name: go-generated-blueprint
+{{- else if .Computed.java }}
+  name: java-generated-blueprint
+{{- else if .Computed.kotlin }}
+  name: kotlin-generated-blueprint
+{{- else if .Computed.cpp }}
+  name: cpp-generated-blueprint
+{{- else if .Computed.rust }}
+  name: rust-generated-blueprint
+{{- else if .Computed.shell }}
+  name: shell-generated-blueprint
+{{- else }}
+  name: {{ .ProjectSnake }}
+{{- end }}
   description: Bazel project using Aspect Workflows
   annotations:
-    # this could also be `url:<url>` if the documentation isn't in the same location
     backstage.io/techdocs-ref: dir:.
-    # backstage.io/source-template: template:default/springboot-template
   tags:
     - bazel
     - aspect-workflows
@@ -93,12 +125,13 @@ metadata:
 {{- end }}
       title: Repository
       icon: github
+    - url: https://docs.aspect.build/
+      title: Aspect Documentation
+      icon: docs
+
 spec:
-  type: template
-  system: software-foundation
+  type: service
   lifecycle: experimental
-  # TODO: Update owner to match your team/organization
   owner: team-platform
-  # dependsOn:
-  #   - component:default/aspect-workflows-template
-  subcomponentOf: application-blueprint-generator
+  system: software-foundation
+{{- end }}

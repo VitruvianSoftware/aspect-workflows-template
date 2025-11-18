@@ -30,6 +30,10 @@ messages:
     💬 Discuss on Bazel Slack: <https://slack.bazel.build> in the #aspect-build channel
 
 questions:
+  - name: backstage
+    prompt:
+      confirm: Generate as a Backstage template?
+      description: "Creates a Backstage software template that can be registered in Backstage's catalog for self-service project creation"
   - name: langs
     validate:
       min: 1
@@ -78,6 +82,7 @@ features:
     globs:
       - "*/prettier.config.cjs"
       - "*/eslint.config.mjs"
+      - "*/.prettierignore"
   - value: "{{ .Scaffold.stamp }}"
     globs:
       - "*/tools/workspace_status.sh"
@@ -150,8 +155,10 @@ features:
     globs:
       - "*/Cargo.*"
       - "*/.clippy.toml"
-
+
 computed:
+  kitchen_sink: "{{ eq (len .Scaffold.langs) 8 }}"
+  minimal: "{{ eq (len .Scaffold.langs) 0 }}"
   javascript: "{{ has \"JavaScript & TypeScript\" .Scaffold.langs }}"
   python: "{{ has \"Python\" .Scaffold.langs }}"
   go: "{{ has \"Go\" .Scaffold.langs }}"
@@ -165,6 +172,62 @@ computed:
   # Do we need to bazel_dep on platforms?
   platforms: "{{ .Scaffold.oci }}"
 presets:
+  # Backstage template presets
+  backstage-kitchen-sink:
+    backstage: true
+    lint: true
+    langs:
+      - 'C & C++'
+      - 'JavaScript & TypeScript'
+      - 'Python'
+      - 'Go'
+      - 'Kotlin'
+      - 'Java'
+      - 'Rust'
+      - 'Shell (Bash)'
+    codegen: true
+    stamp: true
+    oci: true
+  backstage-py:
+    backstage: true
+    langs: ['Python']
+    codegen: true
+    lint: true
+  backstage-js:
+    backstage: true
+    langs: ['JavaScript & TypeScript']
+    codegen: true
+    lint: true
+  backstage-go:
+    backstage: true
+    codegen: true
+    langs: ['Go']
+    lint: true
+    oci: true
+  backstage-java:
+    backstage: true
+    langs: ['Java']
+    lint: true
+  backstage-kotlin:
+    backstage: true
+    langs: ['Kotlin']
+    lint: true
+  backstage-cpp:
+    backstage: true
+    langs: ['C & C++']
+    lint: true
+  backstage-rust:
+    backstage: true
+    langs: ['Rust']
+    lint: true
+  backstage-shell:
+    backstage: true
+    langs: ['Shell (Bash)']
+    lint: true
+  backstage-minimal:
+    backstage: true
+    langs: []
+  # Direct generation presets (existing)
   kitchen-sink:
     lint: true
     langs:

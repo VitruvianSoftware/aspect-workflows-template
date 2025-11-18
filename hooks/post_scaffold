@@ -2,6 +2,59 @@
 
 cd {{ .ProjectSnake }}
 
+{{ if .Scaffold.backstage }}
+# Setup Backstage skeleton structure with copies (not symlinks, as Backstage doesn't follow them)
+echo "📋 Setting up Backstage template skeleton structure..."
+
+SKELETON_DIR="skeleton"
+
+# Only proceed if skeleton directory was created
+if [ ! -d "$SKELETON_DIR" ]; then
+    echo "⚠️  Skeleton directory not found, skipping copy"
+else
+    # Files that should NOT be copied (need Backstage variable substitution or already exist)
+    EXCLUDE_FROM_COPY="template.yaml catalog-info.yaml skeleton README.bazel.md README.md"
+    
+    copy_count=0
+    
+    # Copy all files/directories in current directory to skeleton
+    for item in * .*; do
+        # Skip . and ..
+        if [ "$item" = "." ] || [ "$item" = ".." ]; then
+            continue
+        fi
+        
+        # Skip excluded files
+        should_exclude=0
+        for exclude in $EXCLUDE_FROM_COPY; do
+            if [ "$item" = "$exclude" ]; then
+                should_exclude=1
+                break
+            fi
+        done
+        
+        if [ $should_exclude -eq 1 ]; then
+            continue
+        fi
+        
+        # Skip if already exists in skeleton
+        if [ -e "skeleton/$item" ]; then
+            continue
+        fi
+        
+        # Copy item
+        if [ -e "$item" ]; then
+            echo "  📋 Copying: $item → skeleton/$item"
+            cp -r "$item" "skeleton/"
+            copy_count=$((copy_count + 1))
+        fi
+    done
+    
+    echo "✅ Copied $copy_count items to skeleton/"
+fi
+{{ end }}
+
+{{ if .Scaffold.lint }}
 # Format all Starlark files (i.e. BUILD, WORKSPACE, .bzl, or .sky) in this directory recursively
 set +o errexit # ignore exit code
 # Exits nonzero if it makes changes, and we expect that
@@ -10,6 +63,7 @@ set -o errexit
 
 # Run the format tool
 bazel run //tools/format
+{{ end }}
 
 # Run the repin tool
 ./tools/repin

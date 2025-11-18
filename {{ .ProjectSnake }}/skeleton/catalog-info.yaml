@@ -1,0 +1,56 @@
+# Backstage catalog-info.yaml for generated project
+# This file will be in the generated repository
+# See https://backstage.io/docs/features/software-catalog/descriptor-format
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: {{ "${{" }} values.name {{ "}}" }}
+  description: {{ "${{" }} values.description {{ "}}" }}
+  annotations:
+    github.com/project-slug: {{ "${{" }} values.destination.owner {{ "}}" }}/{{ "${{" }} values.name {{ "}}" }}
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/source-template: {{ "${{" }} values.destination.owner {{ "}}" }}/aspect-workflows-template
+  tags:
+    - bazel
+    - aspect-workflows
+{{- if .Computed.kitchen_sink }}
+    - multi-language
+{{- end }}
+{{- if .Computed.javascript }}
+    - javascript
+    - typescript
+{{- end }}
+{{- if .Computed.python }}
+    - python
+{{- end }}
+{{- if .Computed.go }}
+    - go
+{{- end }}
+{{- if .Computed.java }}
+    - java
+{{- end }}
+{{- if .Computed.kotlin }}
+    - kotlin
+{{- end }}
+{{- if .Computed.cpp }}
+    - cpp
+{{- end }}
+{{- if .Computed.rust }}
+    - rust
+{{- end }}
+{{- if .Computed.shell }}
+    - shell
+{{- end }}
+  links:
+    - url: https://github.com/{{ "${{" }} values.destination.owner {{ "}}" }}/{{ "${{" }} values.name {{ "}}" }}
+      title: Repository
+      icon: github
+    - url: https://docs.aspect.build/
+      title: Aspect Documentation
+      icon: docs
+
+spec:
+  type: service
+  lifecycle: experimental
+  owner: {{ "${{" }} values.owner {{ "}}" }}
+  system: {{ "${{" }} values.name {{ "}}" }}

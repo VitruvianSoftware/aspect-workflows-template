@@ -13,20 +13,27 @@ package(default_visibility = ["//:__subpackages__"])
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 
 prettier.prettier_binary(
-    name = "prettier",
+    name = "prettier_bin",
     # Allow the binary to be run outside bazel
     env = {"BAZEL_BINDIR": "."},
     # Include this js_library and its dependencies in the runfiles (runtime dependencies)
-    data = ["//:prettierrc"],
+    data = ["//:prettier_config", "//:prettier_ignore"],
     fixed_args = [
         # `require` statements in the config file will be resolved relative to its location
         # Therefore to make it hermetic, prettier must be pointed at the copy of the config file
         # in the runfiles folder rather than the one in the source folder.
-        "--config=\"$$JS_BINARY__RUNFILES\"/$(rlocationpath //:prettierrc)",
+        "--config=\"$$JS_BINARY__RUNFILES\"/$(rlocationpath //:prettier_config)",
+        "--ignore-path=\"$$JS_BINARY__RUNFILES\"/$(rlocationpath //:prettier_ignore)",
         # default log level is "log" which spams on success
         # https://prettier.io/docs/en/cli.html#--log-level
         "--log-level=warn",
     ],
+)
+
+sh_binary(
+    name = "prettier",
+    srcs = ["prettier_wrapper.sh"],
+    data = [":prettier_bin"],
 )
 {{ end }}
 

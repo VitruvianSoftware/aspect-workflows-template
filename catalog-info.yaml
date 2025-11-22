@@ -9,8 +9,18 @@ metadata:
     JavaScript/TypeScript, Python, Go, Java, Kotlin, C/C++, Rust, and Shell.
     Includes built-in linting, formatting, testing, and CI/CD configuration.
   annotations:
+    # GitHub Actions CI/CD is enabled by this slug
     github.com/project-slug: BlueCentre/aspect-workflows-template
     backstage.io/techdocs-ref: dir:.
+    # Useful for locating the source code if this entity is defined elsewhere
+    backstage.io/source-location: url:https://github.com/BlueCentre/aspect-workflows-template/
+    # Code coverage visibility
+    backstage.io/code-coverage: scm-only
+    # CI/CD Examples (uncomment and configure as needed):
+    # jenkins.io/job-full-name: folder-name/job-name
+    # circleci.com/project-slug: github/org/project
+    # Code Quality
+    # sonarqube.org/project-key: project-key
   tags:
     - bazel
     - aspect-workflows

@@ -11,7 +11,7 @@ A complete documentation suite has been created covering all aspects of the temp
 ### Root Documentation (4 files)
 
 1. **README.md** - Main documentation hub with overview and navigation
-2. **INDEX.md** - Comprehensive documentation index with cross-references
+2. **index.md** - Comprehensive documentation index with cross-references
 3. **quick-reference.md** - Quick command reference and cheat sheet
 4. **faq.md** - Frequently asked questions with detailed answers
 5. **diagrams.md** - Visual architecture diagrams using Mermaid
@@ -87,10 +87,10 @@ Located in `docs/admin-guide/`:
 🗺️ **Multiple Entry Points:**
 
 - Main README for overview
-- INDEX for comprehensive navigation
+- index for comprehensive navigation
 - Quick Reference for commands
 - FAQ for specific questions
-- Task-based navigation in INDEX
+- Task-based navigation in index
 
 ### Cross-Referencing
 
@@ -98,7 +98,7 @@ Located in `docs/admin-guide/`:
 
 - Every document links to related documents
 - "Next" and "Back" navigation at document ends
-- Quick navigation sections in INDEX
+- Quick navigation sections in index
 - Task-based cross-references
 
 ## Documentation Statistics
@@ -157,7 +157,7 @@ The documentation uses a multi-layered navigation approach:
 ### Layer 1: Entry Points
 
 - **README.md**: General audience, overview
-- **INDEX.md**: Comprehensive navigation by task/component
+- **index.md**: Comprehensive navigation by task/component
 - **quick-reference.md**: Quick command lookup
 
 ### Layer 2: Guides
@@ -191,7 +191,7 @@ The documentation uses a multi-layered navigation approach:
 
 ### For New Users
 
-1. Start with [README.md](./README.md)
+1. Start with [Overview](./overview.md)
 2. Follow [Getting Started](./user-guide/getting-started.md)
 3. Bookmark [Quick Reference](./quick-reference.md)
 4. Reference [FAQ](./faq.md) as needed

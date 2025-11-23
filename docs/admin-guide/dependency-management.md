@@ -447,7 +447,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4.0,<8.0.0",   # Range for dev tools
-    "black>=23.0.0",
+    "mypy>=1.5.0",            # Type checking
 ]
 ```
 

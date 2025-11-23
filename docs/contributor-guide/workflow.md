@@ -28,7 +28,7 @@ We follow a standard GitHub workflow with some specific requirements for templat
 
 ### Fork the Repository
 
-1. Visit https://github.com/aspect-build/aspect-workflows-template
+1. Visit https://github.com/BlueCentre/aspect-workflows-template
 2. Click "Fork" button
 3. Clone your fork:
 
@@ -41,14 +41,14 @@ cd aspect-workflows-template
 
 ```bash
 # Add upstream remote
-git remote add upstream https://github.com/aspect-build/aspect-workflows-template
+git remote add upstream https://github.com/BlueCentre/aspect-workflows-template
 
 # Verify remotes
 git remote -v
 # origin    https://github.com/YOUR-USERNAME/aspect-workflows-template (fetch)
 # origin    https://github.com/YOUR-USERNAME/aspect-workflows-template (push)
-# upstream  https://github.com/aspect-build/aspect-workflows-template (fetch)
-# upstream  https://github.com/aspect-build/aspect-workflows-template (push)
+# upstream  https://github.com/BlueCentre/aspect-workflows-template (fetch)
+# upstream  https://github.com/BlueCentre/aspect-workflows-template (push)
 ```
 
 ### Install Dependencies
@@ -207,7 +207,7 @@ git push origin feature/my-improvement
 
 1. Go to your fork on GitHub
 2. Click "Pull Request" button
-3. Select base: `aspect-build/aspect-workflows-template:main`
+3. Select base: `BlueCentre/aspect-workflows-template:main`
 4. Select compare: `YOUR-USERNAME/aspect-workflows-template:feature/my-improvement`
 5. Click "Create Pull Request"
 
@@ -452,20 +452,20 @@ git push origin fix/python-deps-issue
 
 ```bash
 # Create branch
-git checkout -b docs/add-kotlin-guide
+git checkout -b docs/improve-kotlin-section
 
-# Add documentation
-vim docs/user-guide/languages/kotlin.md
+# Update documentation
+vim docs/user-guide/languages/README.md
 
 # Commit
-git commit -m "docs: add Kotlin language guide
+git commit -m "docs: improve Kotlin language section
 
-- Add getting started section
-- Add dependency management
+- Add getting started examples
+- Add dependency management details
 - Add testing examples"
 
 # Push and create PR
-git push origin docs/add-kotlin-guide
+git push origin docs/improve-kotlin-section
 ```
 
 ### Large Feature Development

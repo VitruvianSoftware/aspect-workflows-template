@@ -11,7 +11,7 @@ The Aspect Workflows Template supports 8 programming languages, each with full i
 | Language | Package Manager | Build Rules | Linter | Formatter |
 |----------|----------------|-------------|---------|-----------|
 | [JavaScript/TypeScript](#javascripttypescript) | pnpm | rules_js, rules_ts | ESLint | Prettier |
-| [Python](#python) | pip | rules_python, aspect_rules_py | Ruff | Black |
+| [Python](#python) | pip | rules_python, aspect_rules_py | Ruff | Ruff |
 | [Go](#go) | Go modules | rules_go | nogo | gofmt |
 | [Java](#java) | Maven | rules_java | PMD | google-java-format |
 | [Kotlin](#kotlin) | Maven | rules_kotlin | ktlint | ktlint |
@@ -68,8 +68,7 @@ Managed via pnpm and `rules_js`:
 ### Features
 - ✅ Hermetic Python interpreter
 - ✅ pip for package management
-- ✅ Ruff for linting
-- ✅ Black for formatting
+- ✅ Ruff for linting and formatting
 - ✅ pytest for testing
 - ✅ Gazelle for BUILD file generation
 - ✅ aspect_rules_py for enhanced performance
@@ -457,17 +456,11 @@ Consider these factors:
 
 ## Next Steps
 
-Choose your language and dive into detailed guides:
-
-- [JavaScript/TypeScript Deep Dive](./languages/javascript.md)
-- [Python Deep Dive](./languages/python.md)
-- [Go Deep Dive](./languages/go.md)
-- [Java Deep Dive](./languages/java.md)
-- [Kotlin Deep Dive](./languages/kotlin.md)
-- [C/C++ Deep Dive](./languages/cpp.md)
-- [Rust Deep Dive](./languages/rust.md)
-- [Shell Deep Dive](./languages/shell.md)
+- Refer to the language-specific sections above for detailed guides
+- Check the [Quick Reference](../../quick-reference.md) for common commands
+- See [Dependency Management](../dependency-management.md) for package management details
+- Visit [Troubleshooting](../troubleshooting.md) if you encounter issues
 
 ---
 
-**Back**: [User Guide](./README.md)
+**Back**: [User Guide](../overview.md)

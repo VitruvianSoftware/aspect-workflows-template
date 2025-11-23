@@ -61,7 +61,7 @@ Use in BUILD files
     [project.optional-dependencies]
     dev = [
         "pytest>=7.4.0",
-        "black>=23.0.0",
+        "mypy>=1.5.0",
     ]
     ```
 

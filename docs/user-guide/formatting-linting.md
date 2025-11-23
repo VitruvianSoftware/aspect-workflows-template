@@ -57,7 +57,7 @@ The template includes formatters for each language:
 
 | Language | Formatter | Style |
 |----------|-----------|-------|
-| Python | Black / Ruff | PEP 8 |
+| Python | Ruff | PEP 8 |
 | JavaScript/TypeScript | Prettier | Standard |
 | Go | gofmt | Go standard |
 | Java | google-java-format | Google style |
@@ -178,7 +178,7 @@ git commit --no-verify -m "emergency fix"
 
 ### Python
 
-#### Formatter: Black / Ruff
+#### Formatter: Ruff
 
 ```bash
 # Format Python files
@@ -600,8 +600,10 @@ Most IDEs can be configured to use project formatters:
 
 ```json
 {
-  "python.formatting.provider": "black",
   "editor.formatOnSave": true,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   }

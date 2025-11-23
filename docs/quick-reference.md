@@ -6,16 +6,18 @@ A quick reference for common tasks and commands when working with the Aspect Wor
 
 ```bash
 # Interactive generation
-scaffold new github.com/aspect-build/aspect-workflows-template
+scaffold new github.com/BlueCentre/aspect-workflows-template
 
 # Using a preset
-scaffold new --preset=py --no-prompt github.com/aspect-build/aspect-workflows-template
+scaffold new --preset=py --no-prompt github.com/BlueCentre/aspect-workflows-template
 
 # Custom output directory
-scaffold new --output-dir=./my-project github.com/aspect-build/aspect-workflows-template
+scaffold new --output-dir=./my-project github.com/BlueCentre/aspect-workflows-template
 ```
 
 ### Available Presets
+
+#### Direct Generation Presets
 
 | Preset | Languages | Features |
 |--------|-----------|----------|
@@ -29,6 +31,23 @@ scaffold new --output-dir=./my-project github.com/aspect-build/aspect-workflows-
 | `rust` | Rust | Lint |
 | `shell` | Shell/Bash | Lint |
 | `kitchen-sink` | All | All features |
+
+#### Backstage Template Presets
+
+For generating Backstage software templates:
+
+| Preset | Languages | Features |
+|--------|-----------|----------|
+| `backstage-minimal` | None | Backstage template structure |
+| `backstage-py` | Python | Backstage + Lint, codegen |
+| `backstage-go` | Go | Backstage + Lint, codegen, OCI |
+| `backstage-js` | JavaScript/TypeScript | Backstage + Lint, codegen |
+| `backstage-java` | Java | Backstage + Lint |
+| `backstage-kotlin` | Kotlin | Backstage + Lint |
+| `backstage-cpp` | C/C++ | Backstage + Lint |
+| `backstage-rust` | Rust | Backstage + Lint |
+| `backstage-shell` | Shell/Bash | Backstage + Lint |
+| `backstage-kitchen-sink` | All | Backstage + All features |
 
 ## Initial Setup
 
@@ -451,4 +470,4 @@ bazel test //...
 - [Development Workflow](./user-guide/development-workflow.md)
 - [Architecture](./contributor-guide/architecture.md)
 - [FAQ](./faq.md)
-- [Documentation Home](./README.md)
+- [Documentation Home](./overview.md)

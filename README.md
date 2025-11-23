@@ -1,111 +1,215 @@
-# Scaffold for basic Aspect Workflows project
+# Aspect Workflows Template
 
-## With Aspect CLI
-Install the Aspect CLI: https://docs.aspect.build/cli/install
+[![Bazel](https://img.shields.io/badge/Bazel-43A047?logo=bazel&logoColor=white)](https://bazel.build)
+[![Scaffold](https://img.shields.io/badge/Scaffold-Template-blue)](https://hay-kot.github.io/scaffold/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-Then add the `init` task with
+> **Multi-language Bazel monorepo template generator** powered by [Scaffold](https://hay-kot.github.io/scaffold/)
 
-```
-aspect axl add gh:aspect-build/aspect-workflows-template
-```
+Generate production-ready, multi-language Bazel monorepos with best practices built-in. Supports **8 programming languages**, integrated tooling, container builds, and optional Backstage integration for self-service project creation.
 
-Finally, run `aspect init`
+---
 
-## Manually
+## 📚 Documentation
 
-Install [scaffold](https://hay-kot.github.io/scaffold/) like so:
+| Guide | Description |
+|-------|-------------|
+| **[📖 Full Documentation](docs/overview.md)** | Complete documentation index |
+| [Getting Started](docs/user-guide/getting-started.md) | Create your first project |
+| [Quick Reference](docs/quick-reference.md) | Command cheatsheet |
+| [FAQ](docs/faq.md) | Frequently asked questions |
+| [Visual Diagrams](docs/diagrams.md) | Architecture diagrams |
+
+### By Role
+
+| Role | Guide | Topics |
+|------|-------|--------|
+| 👤 **Developer** | [User Guide](docs/user-guide/README.md) | Building, testing, formatting, linting |
+| 🔧 **Contributor** | [Contributor Guide](docs/contributor-guide/README.md) | Template system, adding features |
+| 🛠️ **Admin** | [Admin Guide](docs/admin-guide/README.md) | CI/CD, maintenance, Backstage integration |
+
+---
+
+## 🚀 Quick Start
+
+### Install Scaffold
 
 ```shell
-% brew tap hay-kot/scaffold-tap
-% brew install scaffold
+brew tap hay-kot/scaffold-tap && brew install scaffold
 # OR
-% go install github.com/hay-kot/scaffold@latest
+go install github.com/hay-kot/scaffold@latest
 ```
 
-And then create a new project like so:
+### Generate a Project
 
-```shell
-% scaffold new https://github.com/aspect-build/aspect-workflows-template
+```bash
+# Interactive mode
+SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new github.com/BlueCentre/aspect-workflows-template
+
+# With preset (non-interactive)
+SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new --preset=py --output-dir=my-project \
+  github.com/BlueCentre/aspect-workflows-template
+
+cd my-project
+bazel test //...
 ```
 
-## Two Modes of Operation
+---
 
-This template generator supports **two workflows**:
+## 🎯 Two Modes of Operation
 
 ### 1. Direct Project Generation (Default)
 
 Generate a complete, ready-to-use Bazel monorepo:
 
 ```bash
-# Interactive mode
-SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new .
-
-# With preset
 SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new --preset=py --output-dir=my-python-project .
 cd my-python-project
 bazel test //...
 ```
 
-**Use this for**: Quickly starting new projects, prototyping, local development
+**Use this for**: Starting new projects, prototyping, local development
 
 ### 2. Backstage Template Generation
 
-Generate a Backstage software template for self-service project creation:
+Generate a [Backstage](https://backstage.io) software template for self-service project creation:
 
 ```bash
-# Interactive mode - answer "yes" to "Generate as a Backstage template?"
-SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new .
-
-# With backstage preset
 SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new --preset=backstage-py --output-dir=templates/aspect-python .
 ```
 
 **Use this for**: Creating reusable templates in Backstage, standardizing team workflows
 
-> **Note**: The `SCAFFOLD_SETTINGS_RUN_HOOKS=always` environment variable is required to run the post-generation hooks that create symlinks in the skeleton/ directory for Backstage templates.
+> 📖 See [Backstage Quick Start](docs/BACKSTAGE-QUICK-START.md) and [Backstage Integration Guide](docs/admin-guide/backstage-integration.md) for details.
 
-## Quick Links
+---
 
-- 📚 [Full Backstage Integration Guide](docs/admin-guide/backstage-integration.md)
-- ⚡ [Backstage Quick Start](docs/BACKSTAGE-QUICK-START.md)
-- 🔧 [User Guide](docs/user-guide/)
-- 🏗️ [Contributor Guide](docs/contributor-guide/)
+## 📦 Available Presets
 
-## Available Presets
+<table>
+<tr>
+<th>Direct Generation</th>
+<th>Backstage Templates</th>
+</tr>
+<tr>
+<td>
 
-### Direct Generation
-- `py` - Python
-- `js` - JavaScript/TypeScript
-- `go` - Go
-- `java`, `kotlin`, `cpp`, `rust`, `shell`
-- `kitchen-sink` - All languages
-- `minimal` - Bare bones
+| Preset | Languages |
+|--------|-----------|
+| `py` | Python |
+| `js` | JavaScript/TypeScript |
+| `go` | Go |
+| `java` | Java |
+| `kotlin` | Kotlin |
+| `cpp` | C/C++ |
+| `rust` | Rust |
+| `shell` | Shell (Bash) |
+| `kitchen-sink` | All languages |
+| `minimal` | No languages |
 
-### Backstage Templates
-- `backstage-py` - Python template
-- `backstage-js` - JavaScript/TypeScript template
-- `backstage-go` - Go template
-- `backstage-java` - Java template
-- `backstage-kotlin` - Kotlin template
-- `backstage-cpp` - C++ template
-- `backstage-rust` - Rust template
-- `backstage-shell` - Shell template
-- `backstage-kitchen-sink` - All languages template
-- `backstage-minimal` - Bare bones template
+</td>
+<td>
 
-## Examples
+| Preset | Languages |
+|--------|-----------|
+| `backstage-py` | Python |
+| `backstage-js` | JavaScript/TypeScript |
+| `backstage-go` | Go |
+| `backstage-java` | Java |
+| `backstage-kotlin` | Kotlin |
+| `backstage-cpp` | C/C++ |
+| `backstage-rust` | Rust |
+| `backstage-shell` | Shell (Bash) |
+| `backstage-kitchen-sink` | All languages |
+| `backstage-minimal` | No languages |
 
-```bash
-# Create a Python microservice (direct)
-SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new --preset=py --output-dir=payment-service .
+</td>
+</tr>
+</table>
 
-# Create a Go Backstage template
-SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new --preset=backstage-go --output-dir=templates/go-service .
+---
 
-# Create all Backstage templates for your org
-for lang in py js go java kotlin; do
-  SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new --preset=backstage-$lang --output-dir=templates/aspect-$lang .
-done
+## ✨ Features
+
+| Category | Features |
+|----------|----------|
+| **Languages** | Python, JavaScript/TypeScript, Go, Java, Kotlin, C/C++, Rust, Shell |
+| **Build System** | Bazel with bzlmod, Gazelle code generation |
+| **Code Quality** | Formatting (Ruff, Prettier, gofumpt, etc.), Linting (rules_lint) |
+| **Testing** | Integrated test frameworks per language |
+| **Containers** | OCI image building with rules_oci |
+| **CI/CD** | Version stamping, release automation |
+| **Developer Experience** | direnv integration, hermetic tooling via bazel-env |
+
+---
+
+## 🏗️ Generated Project Structure
+
+```
+my-project/
+├── .bazelrc              # Bazel configuration
+├── BUILD                 # Root build file
+├── MODULE.bazel          # Bazel module dependencies
+├── pyproject.toml        # Python configuration (if Python enabled)
+├── package.json          # JS configuration (if JS enabled)
+├── go.mod                # Go configuration (if Go enabled)
+├── requirements/         # Python lockfiles
+├── tools/
+│   ├── format/           # Formatting configuration
+│   ├── lint/             # Linting configuration
+│   └── repin             # Dependency update script
+└── githooks/             # Git hooks for pre-commit
 ```
 
-See [docs/BACKSTAGE-QUICK-START.md](docs/BACKSTAGE-QUICK-START.md) for more examples.
+---
+
+## 🔧 Common Commands
+
+After generating a project:
+
+```bash
+# Setup
+direnv allow                    # Enable environment
+bazel run //tools:bazel_env     # Install tools to PATH
+
+# Development
+bazel build //...               # Build everything
+bazel test //...                # Run tests
+bazel run gazelle               # Regenerate BUILD files
+
+# Code Quality
+format                          # Format all files
+aspect lint //...               # Run linters (requires Aspect CLI)
+aspect lint --fix //...         # Auto-fix lint issues
+
+# Dependencies
+./tools/repin                   # Update Python/Java lockfiles
+pnpm install                    # Update JS dependencies
+go mod tidy && bazel mod tidy   # Update Go dependencies
+```
+
+> 📖 See [Quick Reference](docs/quick-reference.md) for the complete command list.
+
+---
+
+## 📖 Learn More
+
+- **[Full Documentation](docs/overview.md)** - Complete documentation index
+- **[Architecture Overview](docs/contributor-guide/architecture.md)** - How the template system works
+- **[Troubleshooting](docs/user-guide/troubleshooting.md)** - Common issues and solutions
+- **[Visual Diagrams](docs/diagrams.md)** - Architecture and workflow diagrams
+
+---
+
+## 🤝 Contributing
+
+See the [Contributor Guide](docs/contributor-guide/README.md) to learn how to:
+- Add new language support
+- Extend the template system
+- Test your changes
+
+---
+
+## 📄 License
+
+Apache 2.0 - See [LICENSE](LICENSE) for details.

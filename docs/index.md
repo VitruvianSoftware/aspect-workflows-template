@@ -23,7 +23,7 @@ For maintainers managing projects and infrastructure.
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [Main README](./README.md) | Documentation overview and introduction | All |
+| [Overview](./overview.md) | Documentation overview and introduction | All |
 | [Quick Reference](./quick-reference.md) | Command reference and common tasks | User, Admin |
 | [FAQ](./faq.md) | Frequently asked questions | All |
 | [Visual Diagrams](./diagrams.md) | Architecture diagrams and visualizations | All |
@@ -153,7 +153,7 @@ For maintainers managing projects and infrastructure.
 ### For New Users
 
 **Start Here:**
-1. [Main README](./README.md) - Understand what this template is
+1. [Overview](./overview.md) - Understand what this template is
 2. [Getting Started](./user-guide/getting-started.md) - Create your first project
 3. [Quick Reference](./quick-reference.md) - Bookmark for common commands
 4. [FAQ](./faq.md) - Read when you have questions
@@ -279,8 +279,8 @@ Please:
 ## 📞 Contact
 
 For questions about this documentation:
-- **Issues**: [GitHub Issues](https://github.com/aspect-build/aspect-workflows-template/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/aspect-build/aspect-workflows-template/discussions)
+- **Issues**: [GitHub Issues](https://github.com/BlueCentre/aspect-workflows-template/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/BlueCentre/aspect-workflows-template/discussions)
 - **Slack**: #aspect-build on [Bazel Slack](https://slack.bazel.build)
 - **Website**: [aspect.build](https://aspect.build)
 

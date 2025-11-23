@@ -59,7 +59,7 @@ Messages can include template variables:
 ```yaml
 post: |
   cd {{ .ProjectSnake }}
-  bazel run tools:bazel_env
+  bazel run //tools:bazel_env
 ```
 
 ### 3. Questions Section

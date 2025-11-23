@@ -16,7 +16,7 @@ SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new --preset=backstage-py --output-d
 
 Result: Backstage template in `templates/aspect-python/`
 
-> **Important**: Use `SCAFFOLD_SETTINGS_RUN_HOOKS=always` to ensure post-generation hooks run, creating the skeleton/ symlinks for Backstage templates.
+> **Important**: Use `SCAFFOLD_SETTINGS_RUN_HOOKS=always` to ensure post-generation hooks run, which copy files into the `skeleton/` directory for Backstage templates.
 
 ## Comparison
 
@@ -36,7 +36,7 @@ aspect-python/
 ├── template.yaml          # Scaffolder definition
 └── skeleton/              # Code template
     ├── catalog-info.yaml  # For generated projects
-    └── ... (symlinks)
+    └── ... (copied files)
 ```
 
 ## Presets
@@ -94,7 +94,7 @@ done
 
 # Test template structure
 cd templates/aspect-python
-ls -la skeleton/  # Check symlinks
+ls -la skeleton/  # Check copied files
 cat template.yaml # Verify parameters
 ```
 
@@ -119,7 +119,7 @@ ${{ values.owner }}
 
 | Issue | Solution |
 |-------|----------|
-| Skeleton symlinks broken | Re-generate with `SCAFFOLD_SETTINGS_RUN_HOOKS=always` |
+| Skeleton files missing | Re-generate with `SCAFFOLD_SETTINGS_RUN_HOOKS=always` |
 | Template not in Backstage | Check catalog logs, verify Location kind |
 | Variables not replaced | Use `${{ values.* }}` in skeleton files |
 | Missing features | Check parameter names in template.yaml |

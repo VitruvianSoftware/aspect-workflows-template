@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ User runs: scaffold new --preset=py --output-dir=my-app .  │
+│ User runs: scaffold new --preset=py --output-dir=my-app .   │
 └───────────────────────┬─────────────────────────────────────┘
                         │
                         ▼
@@ -14,15 +14,15 @@
         └───────────────┬───────────────┘
                         │
                         ▼
-        ┌───────────────────────────────┐
-        │  Generate project files       │
-        │  - .bazelrc                   │
-        │  - BUILD                      │
-        │  - MODULE.bazel               │
-        │  - pyproject.toml             │
-        │  - tools/                     │
+        ┌─────────────────────────────────┐
+        │  Generate project files         │
+        │  - .bazelrc                     │
+        │  - BUILD                        │
+        │  - MODULE.bazel                 │
+        │  - pyproject.toml               │
+        │  - tools/                       │
         │  - catalog-info.yaml (Component)│
-        └───────────────┬───────────────┘
+        └───────────────┬─────────────────┘
                         │
                         ▼
         ┌───────────────────────────────┐
@@ -44,7 +44,7 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│ User: scaffold new --preset=backstage-py --output-dir=templates │
+│ User: scaffold new --preset=backstage-py --output-dir=templates  │
 └───────────────────────┬──────────────────────────────────────────┘
                         │
                         ▼
@@ -54,18 +54,18 @@
         └───────────────┬───────────────┘
                         │
                         ▼
-        ┌───────────────────────────────┐
-        │  Generate template structure  │
-        │  - template.yaml              │
+        ┌────────────────────────────────┐
+        │  Generate template structure   │
+        │  - template.yaml               │
         │  - catalog-info.yaml (Location)│
-        │  - skeleton/                  │
-        │  - All project files at root  │
-        └───────────────┬───────────────┘
+        │  - skeleton/                   │
+        │  - All project files at root   │
+        └───────────────┬────────────────┘
                         │
                         ▼
         ┌───────────────────────────────┐
         │  Run post_scaffold hook       │
-        │  - Create symlinks in skeleton/│
+        │  - Copy files to skeleton/    │
         │  - Format files               │
         └───────────────┬───────────────┘
                         │
@@ -82,20 +82,20 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Platform Team                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │ 1. Generate template                                 │  │
-│  │    scaffold new --preset=backstage-py               │  │
-│  └──────────────────┬───────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ 1. Generate template                                 │   │
+│  │    scaffold new --preset=backstage-py                │   │
+│  └──────────────────┬───────────────────────────────────┘   │
 │                     │                                       │
-│  ┌──────────────────▼───────────────────────────────────┐  │
-│  │ 2. Publish to GitHub                                 │  │
-│  │    git push origin main                              │  │
-│  └──────────────────┬───────────────────────────────────┘  │
+│  ┌──────────────────▼───────────────────────────────────┐   │
+│  │ 2. Publish to GitHub                                 │   │
+│  │    git push origin main                              │   │
+│  └──────────────────┬───────────────────────────────────┘   │
 │                     │                                       │
-│  ┌──────────────────▼───────────────────────────────────┐  │
-│  │ 3. Register in Backstage catalog                     │  │
-│  │    Add catalog-info.yaml URL                         │  │
-│  └──────────────────────────────────────────────────────┘  │
+│  ┌──────────────────▼───────────────────────────────────┐   │
+│  │ 3. Register in Backstage catalog                     │   │
+│  │    Add catalog-info.yaml URL                         │   │
+│  └──────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
                       │
                       │ Template available
@@ -103,32 +103,32 @@
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Developer                                                  │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │ 4. Browse templates in Backstage UI                  │  │
-│  │    Click "Create" → Select "Aspect Workflows - Py"  │  │
-│  └──────────────────┬───────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ 4. Browse templates in Backstage UI                  │   │
+│  │    Click "Create" → Select "Aspect Workflows - Py"   │   │
+│  └──────────────────┬───────────────────────────────────┘   │
 │                     │                                       │
-│  ┌──────────────────▼───────────────────────────────────┐  │
-│  │ 5. Fill form                                         │  │
-│  │    - Name: payment-service                           │  │
-│  │    - Owner: platform-team                            │  │
-│  │    - Features: linting ✓, OCI ✓                     │  │
-│  └──────────────────┬───────────────────────────────────┘  │
+│  ┌──────────────────▼───────────────────────────────────┐   │
+│  │ 5. Fill form                                         │   │
+│  │    - Name: payment-service                           │   │
+│  │    - Owner: platform-team                            │   │
+│  │    - Features: linting ✓, OCI ✓                      │   │
+│  └──────────────────┬───────────────────────────────────┘   │
 │                     │                                       │
-│  ┌──────────────────▼───────────────────────────────────┐  │
-│  │ 6. Backstage creates repo                            │  │
-│  │    - Fetch skeleton/                                 │  │
-│  │    - Replace ${{ values.* }}                         │  │
-│  │    - Create GitHub repo                              │  │
-│  │    - Register component                              │  │
-│  └──────────────────┬───────────────────────────────────┘  │
+│  ┌──────────────────▼───────────────────────────────────┐   │
+│  │ 6. Backstage creates repo                            │   │
+│  │    - Fetch skeleton/                                 │   │
+│  │    - Replace ${{ values.* }}                         │   │
+│  │    - Create GitHub repo                              │   │
+│  │    - Register component                              │   │
+│  └──────────────────┬───────────────────────────────────┘   │
 │                     │                                       │
-│  ┌──────────────────▼───────────────────────────────────┐  │
-│  │ 7. Clone and develop                                 │  │
-│  │    git clone .../payment-service                     │  │
-│  │    cd payment-service                                │  │
-│  │    bazel test //...                                  │  │
-│  └──────────────────────────────────────────────────────┘  │
+│  ┌──────────────────▼───────────────────────────────────┐   │
+│  │ 7. Clone and develop                                 │   │
+│  │    git clone .../payment-service                     │   │
+│  │    cd payment-service                                │   │
+│  │    bazel test //...                                  │   │
+│  └──────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -166,14 +166,14 @@ templates/aspect-python/
 ├── tools/
 ├── githooks/
 └── skeleton/                  # Template for scaffolding
-    ├── catalog-info.yaml      # Kind: Component (for generated)
-    ├── .bazelrc -> ../.bazelrc          # Symlink
-    ├── BUILD -> ../BUILD                # Symlink
-    ├── MODULE.bazel -> ../MODULE.bazel  # Symlink
-    ├── pyproject.toml -> ../pyproject.toml
-    ├── requirements/ -> ../requirements/
-    ├── tools/ -> ../tools/
-    └── githooks/ -> ../githooks/
+    ├── catalog-info.yaml      # Kind: Component (with Backstage variables)
+    ├── .bazelrc               # Copied from root
+    ├── BUILD                  # Copied from root
+    ├── MODULE.bazel           # Copied from root
+    ├── pyproject.toml         # Copied from root
+    ├── requirements/          # Copied from root
+    ├── tools/                 # Copied from root
+    └── githooks/              # Copied from root
 ```
 
 ## Decision Flow
@@ -210,14 +210,14 @@ templates/aspect-python/
 └───────────────┘         └───────────────┘
 ```
 
-## Symlink Strategy
+## Copy Strategy
 
 ```
 Backstage Template Structure
 ────────────────────────────
 
 ┌─────────────────────────────────────────────┐
-│ Root Level (Source of Truth)               │
+│ Root Level (Source of Truth)                │
 │                                             │
 │  .bazelrc                                   │
 │  BUILD                                      │
@@ -227,27 +227,26 @@ Backstage Template Structure
 │                                             │
 └─────────────────┬───────────────────────────┘
                   │
-                  │ Symlinked to
+                  │ Copied to (by post_scaffold hook)
                   │
                   ▼
 ┌─────────────────────────────────────────────┐
 │ skeleton/ (Template Files)                  │
 │                                             │
-│  .bazelrc ──────────► ../.bazelrc          │
-│  BUILD ─────────────► ../BUILD             │
-│  MODULE.bazel ──────► ../MODULE.bazel      │
-│  pyproject.toml ────► ../pyproject.toml    │
-│  tools/ ────────────► ../tools/            │
+│  .bazelrc                                   │
+│  BUILD                                      │
+│  MODULE.bazel                               │
+│  pyproject.toml                             │
+│  tools/                                     │
 │                                             │
-│  catalog-info.yaml  (NOT symlink!)         │
-│    Uses: ${{ values.name }}                │
-│          ${{ values.owner }}               │
+│  catalog-info.yaml  (Backstage variables)   │
+│    Uses: ${{ values.name }}                 │
+│          ${{ values.owner }}                │
 │                                             │
 └─────────────────────────────────────────────┘
 
-Benefits:
-✓ No file duplication
-✓ Single source of truth
-✓ Updates automatically propagate
-✓ Backstage-specific files separate
+How it works:
+✓ Post-generation hook copies files to skeleton/ (not symlinks - Backstage doesn't follow them)
+✓ Some files excluded (template.yaml, root catalog-info.yaml, README.bazel.md)
+✓ Backstage-specific files use ${{ values.* }} syntax
 ```

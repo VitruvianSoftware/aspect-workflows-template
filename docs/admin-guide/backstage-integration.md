@@ -9,7 +9,7 @@ The template generator operates in two modes:
 1. **Direct Generation Mode** (default): Generates ready-to-use Bazel monorepo projects
 2. **Backstage Template Mode**: Generates Backstage software templates that can be registered in Backstage's catalog
 
-> **Important**: All commands in this guide use `SCAFFOLD_SETTINGS_RUN_HOOKS=always` to ensure post-generation hooks run. These hooks are essential for creating symlinks in the skeleton/ directory for Backstage templates.
+> **Important**: All commands in this guide use `SCAFFOLD_SETTINGS_RUN_HOOKS=always` to ensure post-generation hooks run. These hooks are essential for copying files into the `skeleton/` directory for Backstage templates.
 
 ## Quick Start
 
@@ -63,11 +63,11 @@ backstage-templates/aspect-python/
 ├── template.yaml           # Scaffolder definition
 └── skeleton/               # The actual code to scaffold
     ├── catalog-info.yaml   # Component (for generated projects)
-    ├── .bazelrc -> ../.bazelrc  # Symlinks to avoid duplication
-    ├── BUILD -> ../BUILD
-    ├── MODULE.bazel -> ../MODULE.bazel
-    ├── pyproject.toml -> ../pyproject.toml
-    └── ... (symlinked files + Backstage-specific files)
+    ├── .bazelrc
+    ├── BUILD
+    ├── MODULE.bazel
+    ├── pyproject.toml
+    └── ... (copied files + Backstage-specific files)
 ```
 
 ## Key Differences
@@ -145,7 +145,7 @@ cd templates/aspect-python
 ls -la
 # catalog-info.yaml
 # template.yaml
-# skeleton/ (with symlinks)
+# skeleton/ (with copied files)
 
 # Publish to GitHub
 git init
@@ -192,29 +192,25 @@ Backstage creates `https://github.com/YOUR-ORG/payment-service` with full Bazel 
 
 ## Understanding the Skeleton Directory
 
-The `skeleton/` directory (only in Backstage mode) uses **symlinks** to avoid duplicating files:
-
-## Understanding the Skeleton Directory
-
-The `skeleton/` directory (only in Backstage mode) uses **symlinks** to avoid duplicating files:
+The `skeleton/` directory (only in Backstage mode) contains **copies** of project files:
 
 ```bash
 skeleton/
 ├── catalog-info.yaml          # Unique (uses ${{ values.* }})
-├── .bazelrc -> ../.bazelrc   # Symlink to parent
-├── BUILD -> ../BUILD          # Symlink to parent
-├── MODULE.bazel -> ../MODULE.bazel
-├── tools/ -> ../tools/
+├── .bazelrc
+├── BUILD
+├── MODULE.bazel
+├── tools/
 └── ...
 ```
 
-### Why Symlinks?
+### How It Works
 
-1. **No Duplication**: Source of truth remains at root level
-2. **Easy Updates**: Change once, reflects in skeleton automatically
-3. **Backstage Variables**: Only files needing `${{ values.* }}` are separate copies
+1. **Post-generation hook**: Copies files from root to `skeleton/`
+2. **Exclusions**: Some files are NOT copied (template.yaml, catalog-info.yaml at root, skeleton itself)
+3. **Backstage Variables**: Files needing `${{ values.* }}` substitution are in `skeleton/` with those variables
 
-### Files That Are NOT Symlinked
+### Files That Are Unique in Skeleton
 
 - `catalog-info.yaml` - Uses Backstage variables for generated project metadata
 - `README.bazel.md` - May include project name variable
@@ -234,7 +230,7 @@ questions:
 
 **When `backstage: true`**:
 - Creates `template.yaml`
-- Creates `skeleton/` directory with symlinks
+- Creates `skeleton/` directory with copied files
 - Changes `catalog-info.yaml` from Component to Location
 
 **When `backstage: false`** (default):
@@ -338,7 +334,7 @@ scaffold new --preset=backstage-py --output-dir=/tmp/test-template .
 cd /tmp/test-template
 tree -L 2
 
-# Verify symlinks
+# Verify skeleton files
 ls -la skeleton/
 
 # Check template.yaml syntax
@@ -411,15 +407,14 @@ done
 3. Ensure `template.yaml` path is correct
 4. Check repository is public or Backstage has access
 
-### Symlinks Not Working
+### Skeleton Files Missing
 
-**Symptoms**: `skeleton/` files missing or broken
+**Symptoms**: `skeleton/` directory empty or files missing
 
 **Solutions**:
 1. Ensure hooks are enabled: `SCAFFOLD_SETTINGS_RUN_HOOKS=always`
 2. Re-generate with hooks enabled
 3. Check if Git LFS is required for large files
-4. On Windows, ensure Developer Mode enabled for symlinks
 
 ### Variables Not Replaced
 

@@ -1,0 +1,65 @@
+site_name: Aspect Workflows Monorepo Generator
+site_description: Multi-language Bazel monorepo template generator powered by Scaffold
+repo_url: https://github.com/BlueCentre/aspect-workflows-template
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+
+# Use directory URLs for cleaner paths, but this means links should use directory style
+use_directory_urls: true
+
+nav:
+  - Home: index.md
+  - Overview: overview.md
+  - Quick Reference: quick-reference.md
+  - FAQ: faq.md
+  - Diagrams: diagrams.md
+  - User Guide:
+      - Overview: user-guide/README.md
+      - Getting Started: user-guide/getting-started.md
+      - Development Workflow: user-guide/development-workflow.md
+      - Building & Testing: user-guide/building-testing.md
+      - Formatting & Linting: user-guide/formatting-linting.md
+      - Dependency Management: user-guide/dependency-management.md
+      - Troubleshooting: user-guide/troubleshooting.md
+      - Language Support:
+          - Overview: user-guide/languages/README.md
+  - Contributor Guide:
+      - Overview: contributor-guide/README.md
+      - Architecture: contributor-guide/architecture.md
+      - Template System: contributor-guide/template-system.md
+      - Adding Features: contributor-guide/adding-features.md
+      - Adding Languages: contributor-guide/adding-languages.md
+      - Testing: contributor-guide/testing.md
+      - Workflow: contributor-guide/workflow.md
+  - Admin Guide:
+      - Overview: admin-guide/README.md
+      - Backstage Integration: admin-guide/backstage-integration.md
+      - CI/CD: admin-guide/ci-cd.md
+      - Dependency Management: admin-guide/dependency-management.md
+      - Maintenance: admin-guide/maintenance.md
+      - Monitoring: admin-guide/monitoring.md
+      - Release Management: admin-guide/release-management.md
+      - Security: admin-guide/security.md
+      - Troubleshooting: admin-guide/troubleshooting.md
+
+plugins:
+  - techdocs-core
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - toc:
+      permalink: true

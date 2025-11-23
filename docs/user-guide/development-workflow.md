@@ -248,8 +248,8 @@ If not using the integrated formatter:
 # Format Bazel files
 bazel run @buildifier_prebuilt//:buildifier -- -r .
 
-# Format Python (if black is installed)
-bazel run //tools/format:black -- src/
+# Format Python (uses Ruff)
+bazel run //tools/format -- src/
 
 # Format JavaScript (if prettier is installed)
 bazel run //tools/format:prettier -- packages/

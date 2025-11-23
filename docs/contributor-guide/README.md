@@ -117,7 +117,7 @@ graph TB
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/aspect-build/aspect-workflows-template
+    git clone https://github.com/BlueCentre/aspect-workflows-template
     cd aspect-workflows-template
     ```
 
@@ -224,4 +224,4 @@ We follow the [Bazel Community Code of Conduct](https://bazel.build/community/co
 
 ---
 
-**Next**: [Architecture Overview](./architecture.md) | **Up**: [Documentation Home](../README.md)
+**Next**: [Architecture Overview](./architecture.md) | **Up**: [Documentation Home](../overview.md)

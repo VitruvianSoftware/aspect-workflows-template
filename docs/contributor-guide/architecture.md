@@ -212,7 +212,7 @@ flowchart LR
     
     Format --> Buildifier[Bazel files]
     Format --> Prettier[JS/TS files]
-    Format --> Black[Python files]
+    Format --> Ruff[Python files]
     Format --> Gofmt[Go files]
     Format --> More[Language-specific formatters]
     

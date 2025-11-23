@@ -20,14 +20,14 @@ brew tap hay-kot/scaffold-tap
 brew install scaffold
 
 # Create a new project
-scaffold new github.com/aspect-build/aspect-workflows-template
+scaffold new github.com/BlueCentre/aspect-workflows-template
 
 # Enter your project
 cd <your-project-name>
 
 # Set up development environment
 direnv allow
-bazel run tools:bazel_env
+bazel run //tools:bazel_env
 
 # Start developing!
 aspect test //...
@@ -83,4 +83,4 @@ Projects generated from this template include:
 ## Navigation
 
 - **Next**: [Getting Started](./getting-started.md)
-- **Up**: [Documentation Home](../README.md)
+- **Up**: [Documentation Home](../overview.md)

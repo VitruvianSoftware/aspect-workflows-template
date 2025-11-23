@@ -445,7 +445,7 @@ flowchart LR
         Manual[Developer] --> FormatCmd[Run format]
         FormatCmd --> Buildifier[Bazel Files]
         FormatCmd --> Prettier[JS/TS Files]
-        FormatCmd --> Black[Python Files]
+        FormatCmd --> Ruff[Python Files]
         FormatCmd --> More[More Formatters...]
     end
     
@@ -690,4 +690,4 @@ Use these diagrams as reference when:
 
 ---
 
-**Back**: [Documentation Home](../README.md)
+**Back**: [Documentation Home](./overview.md)

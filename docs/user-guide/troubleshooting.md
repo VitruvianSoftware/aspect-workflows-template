@@ -42,7 +42,7 @@ scaffold --version
 1. Ensure you're using the correct template URL:
 
    ```bash
-   scaffold new github.com/aspect-build/aspect-workflows-template
+   scaffold new github.com/BlueCentre/aspect-workflows-template
    ```
 
 2. Check your scaffold version:
@@ -54,7 +54,7 @@ scaffold --version
 3. Try with a preset to bypass interactive mode:
 
    ```bash
-   scaffold new --preset=minimal --no-prompt github.com/aspect-build/aspect-workflows-template
+   scaffold new --preset=minimal --no-prompt github.com/BlueCentre/aspect-workflows-template
    ```
 
 ### Post-scaffold hook fails
@@ -682,9 +682,9 @@ bazel query --output=build //pkg:target
 
 If you're still stuck:
 
-1. **Search existing issues**: [GitHub Issues](https://github.com/aspect-build/aspect-workflows-template/issues)
+1. **Search existing issues**: [GitHub Issues](https://github.com/BlueCentre/aspect-workflows-template/issues)
 2. **Ask in Slack**: #aspect-build on [Bazel Slack](https://slack.bazel.build)
-3. **GitHub Discussions**: [Ask a question](https://github.com/aspect-build/aspect-workflows-template/discussions)
+3. **GitHub Discussions**: [Ask a question](https://github.com/BlueCentre/aspect-workflows-template/discussions)
 4. **Check documentation**:
    - [Bazel Docs](https://bazel.build/)
    - [Aspect CLI Docs](https://docs.aspect.build/)

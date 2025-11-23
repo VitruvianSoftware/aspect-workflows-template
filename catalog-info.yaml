@@ -11,9 +11,8 @@ metadata:
   annotations:
     # GitHub Actions CI/CD is enabled by this slug
     github.com/project-slug: BlueCentre/aspect-workflows-template
-    backstage.io/techdocs-ref: dir:.
-    # Useful for locating the source code if this entity is defined elsewhere
-    backstage.io/source-location: url:https://github.com/BlueCentre/aspect-workflows-template/
+    backstage.io/source-location: url:https://github.com/BlueCentre/aspect-workflows-template/tree/platform-v2.0
+    backstage.io/techdocs-ref: url:https://github.com/BlueCentre/aspect-workflows-template/tree/platform-v2.0
     # Code coverage visibility
     backstage.io/code-coverage: scm-only
     # CI/CD Examples (uncomment and configure as needed):

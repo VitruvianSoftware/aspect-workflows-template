@@ -68,7 +68,7 @@ bazel run //tools/format
 # Run the repin tool
 ./tools/repin
 
-{{ if .Computed.js }}
+{{ if .Computed.javascript }}
 bazel run @pnpm -- --dir=$PWD install --lockfile-only
 {{ end }}
 

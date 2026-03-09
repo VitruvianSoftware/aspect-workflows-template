@@ -155,6 +155,10 @@ features:
     globs:
       - "*/Cargo.*"
       - "*/.clippy.toml"
+  - value: "{{ .Scaffold.backstage }}"
+    globs:
+      - "*/template.yaml"
+      - "*/skeleton/**"
 
 computed:
   kitchen_sink: "{{ eq (len .Scaffold.langs) 8 }}"

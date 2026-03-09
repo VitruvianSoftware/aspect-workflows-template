@@ -53,6 +53,8 @@ exports_files([
 {{ if .Computed.shell }}
     ".shellcheckrc",
 {{ end }}
+{{ if .Computed.rust }}
+    ".clippy.toml",
 {{ end }}
 ], visibility = ["//:__subpackages__"])
 {{ end }}

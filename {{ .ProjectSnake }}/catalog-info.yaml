@@ -25,6 +25,10 @@ metadata:
   name: rust-generated-blueprint
 {{- else if .Computed.shell }}
   name: shell-generated-blueprint
+{{- else if .Computed.ruby }}
+  name: ruby-generated-blueprint
+{{- else if .Computed.scala }}
+  name: scala-generated-blueprint
 {{- else }}
   name: {{ .ProjectSnake }}
 {{- end }}
@@ -59,6 +63,10 @@ metadata:
   name: rust-generated-blueprint
 {{- else if .Computed.shell }}
   name: shell-generated-blueprint
+{{- else if .Computed.ruby }}
+  name: ruby-generated-blueprint
+{{- else if .Computed.scala }}
+  name: scala-generated-blueprint
 {{- else }}
   name: {{ .ProjectSnake }}
 {{- end }}
@@ -99,6 +107,12 @@ metadata:
 {{- if .Computed.shell }}
     - shell
 {{- end }}
+{{- if .Computed.ruby }}
+    - ruby
+{{- end }}
+{{- if .Computed.scala }}
+    - scala
+{{- end }}
   links:
 {{- if .Computed.kitchen_sink }}
     - url: https://github.com/BlueCentre/kitchen-sink
@@ -120,6 +134,10 @@ metadata:
     - url: https://github.com/BlueCentre/rust
 {{- else if .Computed.shell }}
     - url: https://github.com/BlueCentre/shell
+{{- else if .Computed.ruby }}
+    - url: https://github.com/BlueCentre/ruby
+{{- else if .Computed.scala }}
+    - url: https://github.com/BlueCentre/scala
 {{- else }}
     - url: https://github.com/BlueCentre/unknown
 {{- end }}

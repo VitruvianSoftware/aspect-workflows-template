@@ -155,7 +155,7 @@ features:
     globs:
       - "*/Cargo.*"
       - "*/.clippy.toml"
-
+
 computed:
   kitchen_sink: "{{ eq (len .Scaffold.langs) 8 }}"
   minimal: "{{ eq (len .Scaffold.langs) 0 }}"

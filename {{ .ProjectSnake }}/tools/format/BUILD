@@ -13,7 +13,7 @@ package(default_visibility = ["//:__subpackages__"])
 load("@npm//:prettier/package_json.bzl", prettier = "bin")
 
 prettier.prettier_binary(
-    name = "prettier_bin",
+    name = "prettier",
     # Allow the binary to be run outside bazel
     env = {"BAZEL_BINDIR": "."},
     # Include this js_library and its dependencies in the runfiles (runtime dependencies)
@@ -28,12 +28,6 @@ prettier.prettier_binary(
         # https://prettier.io/docs/en/cli.html#--log-level
         "--log-level=warn",
     ],
-)
-
-sh_binary(
-    name = "prettier",
-    srcs = ["prettier_wrapper.sh"],
-    data = [":prettier_bin"],
 )
 {{ end }}
 

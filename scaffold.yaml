@@ -231,6 +231,15 @@ presets:
   backstage-minimal:
     backstage: true
     langs: []
+  backstage-ruby:
+    backstage: true
+    langs: ['Ruby']
+    lint: true
+    proto: true
+  backstage-scala:
+    backstage: true
+    langs: ['Scala']
+    lint: true
   # Direct generation presets (existing)
   kitchen-sink:
     lint: true

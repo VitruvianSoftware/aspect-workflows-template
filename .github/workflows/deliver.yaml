@@ -4,6 +4,7 @@ on:
 jobs:
     deliver:
         strategy:
+            fail-fast: false
             matrix:
                 preset:
                     - cpp

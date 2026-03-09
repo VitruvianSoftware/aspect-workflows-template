@@ -53,7 +53,7 @@ exports_files([
 {{ if .Computed.shell }}
     ".shellcheckrc",
 {{ end }}
-{{ end }}
+{{ end }}
 ], visibility = ["//:__subpackages__"])
 {{ end }}
 

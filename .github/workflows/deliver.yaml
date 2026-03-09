@@ -18,6 +18,18 @@ jobs:
                     - ruby
                     - shell
                     - scala
+                    - backstage-cpp
+                    - backstage-go
+                    - backstage-java
+                    - backstage-js
+                    - backstage-kitchen-sink
+                    - backstage-kotlin
+                    - backstage-minimal
+                    - backstage-py
+                    - backstage-ruby
+                    - backstage-rust
+                    - backstage-scala
+                    - backstage-shell
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6

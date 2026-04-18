@@ -6,13 +6,13 @@ A quick reference for common tasks and commands when working with the Aspect Wor
 
 ```bash
 # Interactive generation
-scaffold new github.com/BlueCentre/aspect-workflows-template
+scaffold new github.com/VitruvianSoftware/aspect-workflows-template
 
 # Using a preset
-scaffold new --preset=py --no-prompt github.com/BlueCentre/aspect-workflows-template
+scaffold new --preset=py --no-prompt github.com/VitruvianSoftware/aspect-workflows-template
 
 # Custom output directory
-scaffold new --output-dir=./my-project github.com/BlueCentre/aspect-workflows-template
+scaffold new --output-dir=./my-project github.com/VitruvianSoftware/aspect-workflows-template
 ```
 
 ### Available Presets

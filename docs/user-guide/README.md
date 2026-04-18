@@ -20,7 +20,7 @@ brew tap hay-kot/scaffold-tap
 brew install scaffold
 
 # Create a new project
-scaffold new github.com/BlueCentre/aspect-workflows-template
+scaffold new github.com/VitruvianSoftware/aspect-workflows-template
 
 # Enter your project
 cd <your-project-name>

@@ -46,7 +46,7 @@ The template will install hermetic toolchains for most languages, but some initi
 Run scaffold in interactive mode to answer questions about your project:
 
 ```bash
-scaffold new github.com/BlueCentre/aspect-workflows-template
+scaffold new github.com/VitruvianSoftware/aspect-workflows-template
 ```
 
 You'll be prompted to answer:
@@ -63,22 +63,22 @@ For common scenarios, use a preset:
 
 ```bash
 # Minimal project (no languages selected)
-scaffold new --preset=minimal --no-prompt github.com/BlueCentre/aspect-workflows-template
+scaffold new --preset=minimal --no-prompt github.com/VitruvianSoftware/aspect-workflows-template
 
 # JavaScript/TypeScript project
-scaffold new --preset=js --no-prompt github.com/BlueCentre/aspect-workflows-template
+scaffold new --preset=js --no-prompt github.com/VitruvianSoftware/aspect-workflows-template
 
 # Python project
-scaffold new --preset=py --no-prompt github.com/BlueCentre/aspect-workflows-template
+scaffold new --preset=py --no-prompt github.com/VitruvianSoftware/aspect-workflows-template
 
 # Go project with container support
-scaffold new --preset=go --no-prompt github.com/BlueCentre/aspect-workflows-template
+scaffold new --preset=go --no-prompt github.com/VitruvianSoftware/aspect-workflows-template
 
 # Java project
-scaffold new --preset=java --no-prompt github.com/BlueCentre/aspect-workflows-template
+scaffold new --preset=java --no-prompt github.com/VitruvianSoftware/aspect-workflows-template
 
 # Kitchen sink (all features enabled)
-scaffold new --preset=kitchen-sink --no-prompt github.com/BlueCentre/aspect-workflows-template
+scaffold new --preset=kitchen-sink --no-prompt github.com/VitruvianSoftware/aspect-workflows-template
 ```
 
 Available presets:
@@ -99,7 +99,7 @@ Available presets:
 Specify where to create your project:
 
 ```bash
-scaffold new --output-dir=./my-project github.com/BlueCentre/aspect-workflows-template
+scaffold new --output-dir=./my-project github.com/VitruvianSoftware/aspect-workflows-template
 ```
 
 ## Initial Setup

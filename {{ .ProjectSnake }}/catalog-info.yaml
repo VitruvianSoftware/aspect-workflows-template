@@ -115,31 +115,31 @@ metadata:
 {{- end }}
   links:
 {{- if .Computed.kitchen_sink }}
-    - url: https://github.com/BlueCentre/kitchen-sink
+    - url: https://github.com/VitruvianSoftware/kitchen-sink
 {{- else if .Computed.minimal }}
-    - url: https://github.com/BlueCentre/minimal
+    - url: https://github.com/VitruvianSoftware/minimal
 {{- else if .Computed.javascript }}
-    - url: https://github.com/BlueCentre/javascript
+    - url: https://github.com/VitruvianSoftware/javascript
 {{- else if .Computed.python }}
-    - url: https://github.com/BlueCentre/python
+    - url: https://github.com/VitruvianSoftware/python
 {{- else if .Computed.go }}
-    - url: https://github.com/BlueCentre/go
+    - url: https://github.com/VitruvianSoftware/go
 {{- else if .Computed.java }}
-    - url: https://github.com/BlueCentre/java
+    - url: https://github.com/VitruvianSoftware/java
 {{- else if .Computed.kotlin }}
-    - url: https://github.com/BlueCentre/kotlin
+    - url: https://github.com/VitruvianSoftware/kotlin
 {{- else if .Computed.cpp }}
-    - url: https://github.com/BlueCentre/cpp
+    - url: https://github.com/VitruvianSoftware/cpp
 {{- else if .Computed.rust }}
-    - url: https://github.com/BlueCentre/rust
+    - url: https://github.com/VitruvianSoftware/rust
 {{- else if .Computed.shell }}
-    - url: https://github.com/BlueCentre/shell
+    - url: https://github.com/VitruvianSoftware/shell
 {{- else if .Computed.ruby }}
-    - url: https://github.com/BlueCentre/ruby
+    - url: https://github.com/VitruvianSoftware/ruby
 {{- else if .Computed.scala }}
-    - url: https://github.com/BlueCentre/scala
+    - url: https://github.com/VitruvianSoftware/scala
 {{- else }}
-    - url: https://github.com/BlueCentre/unknown
+    - url: https://github.com/VitruvianSoftware/unknown
 {{- end }}
       title: Repository
       icon: github

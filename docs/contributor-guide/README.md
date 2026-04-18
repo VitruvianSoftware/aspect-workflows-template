@@ -117,7 +117,7 @@ graph TB
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/BlueCentre/aspect-workflows-template
+    git clone https://github.com/VitruvianSoftware/aspect-workflows-template
     cd aspect-workflows-template
     ```
 

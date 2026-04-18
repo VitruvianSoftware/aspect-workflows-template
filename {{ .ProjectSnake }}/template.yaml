@@ -80,27 +80,27 @@ metadata:
 {{- end }}
   links:
 {{- if .Computed.kitchen_sink }}
-    - url: https://github.com/BlueCentre/backstage-kitchen-sink
+    - url: https://github.com/VitruvianSoftware/backstage-kitchen-sink
 {{- else if .Computed.minimal }}
-    - url: https://github.com/BlueCentre/backstage-minimal
+    - url: https://github.com/VitruvianSoftware/backstage-minimal
 {{- else if .Computed.javascript }}
-    - url: https://github.com/BlueCentre/backstage-javascript
+    - url: https://github.com/VitruvianSoftware/backstage-javascript
 {{- else if .Computed.python }}
-    - url: https://github.com/BlueCentre/backstage-python
+    - url: https://github.com/VitruvianSoftware/backstage-python
 {{- else if .Computed.go }}
-    - url: https://github.com/BlueCentre/backstage-go
+    - url: https://github.com/VitruvianSoftware/backstage-go
 {{- else if .Computed.java }}
-    - url: https://github.com/BlueCentre/backstage-java
+    - url: https://github.com/VitruvianSoftware/backstage-java
 {{- else if .Computed.kotlin }}
-    - url: https://github.com/BlueCentre/backstage-kotlin
+    - url: https://github.com/VitruvianSoftware/backstage-kotlin
 {{- else if .Computed.cpp }}
-    - url: https://github.com/BlueCentre/backstage-cpp
+    - url: https://github.com/VitruvianSoftware/backstage-cpp
 {{- else if .Computed.rust }}
-    - url: https://github.com/BlueCentre/backstage-rust
+    - url: https://github.com/VitruvianSoftware/backstage-rust
 {{- else if .Computed.shell }}
-    - url: https://github.com/BlueCentre/backstage-shell
+    - url: https://github.com/VitruvianSoftware/backstage-shell
 {{- else }}
-    - url: https://github.com/BlueCentre/unknown
+    - url: https://github.com/VitruvianSoftware/unknown
 {{- end }}
       title: Source
       icon: github

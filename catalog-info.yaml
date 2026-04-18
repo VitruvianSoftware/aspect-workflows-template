@@ -10,9 +10,9 @@ metadata:
     Includes built-in linting, formatting, testing, and CI/CD configuration.
   annotations:
     # GitHub Actions CI/CD is enabled by this slug
-    github.com/project-slug: BlueCentre/aspect-workflows-template
-    backstage.io/source-location: url:https://github.com/BlueCentre/aspect-workflows-template/tree/platform-v2.0
-    backstage.io/techdocs-ref: url:https://github.com/BlueCentre/aspect-workflows-template/tree/platform-v2.0
+    github.com/project-slug: VitruvianSoftware/aspect-workflows-template
+    backstage.io/source-location: url:https://github.com/VitruvianSoftware/aspect-workflows-template/tree/platform-v2.0
+    backstage.io/techdocs-ref: url:https://github.com/VitruvianSoftware/aspect-workflows-template/tree/platform-v2.0
     # Code coverage visibility
     backstage.io/code-coverage: scm-only
     # CI/CD Examples (uncomment and configure as needed):
@@ -29,7 +29,7 @@ metadata:
     - multi-language
     - code-generator
   links:
-    - url: https://github.com/BlueCentre/aspect-workflows-template
+    - url: https://github.com/VitruvianSoftware/aspect-workflows-template
       title: Source Repository
       icon: github
     - url: https://hay-kot.github.io/scaffold/

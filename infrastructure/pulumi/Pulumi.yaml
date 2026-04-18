@@ -1,0 +1,3 @@
+name: aspect-workflows-template-infra
+runtime: go
+description: Infrastructure as code for aspect-workflows-template and its starter repositories.

@@ -1,6 +1,6 @@
 site_name: Aspect Workflows Monorepo Generator
 site_description: Multi-language Bazel monorepo template generator powered by Scaffold
-repo_url: https://github.com/BlueCentre/aspect-workflows-template
+repo_url: https://github.com/VitruvianSoftware/aspect-workflows-template
 edit_uri: edit/main/docs/
 
 docs_dir: docs

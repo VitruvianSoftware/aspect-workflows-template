@@ -71,4 +71,4 @@ jobs:
                 fi
                 eval $(ssh-agent -s)
                 ssh-add - <<< "$SSH_KEY"
-                git push  --force git@github.com:BlueCentre/${{ matrix.preset }}.git HEAD:main
+                git push  --force git@github.com:VitruvianSoftware/${{ matrix.preset }}.git HEAD:main

@@ -14,7 +14,7 @@ PRESETS=(
     "backstage-shell"
 )
 
-ORG="BlueCentre"
+ORG="VitruvianSoftware"
 
 for preset in "${PRESETS[@]}"; do
     REPO_NAME="$ORG/$preset"
@@ -58,7 +58,7 @@ for preset in "${PRESETS[@]}"; do
 
     # 4. Add Secret to Current Repo
     # Hardcoded to ensure we target the correct repo for secrets
-    CURRENT_REPO="BlueCentre/aspect-workflows-template"
+    CURRENT_REPO="VitruvianSoftware/aspect-workflows-template"
     echo "Setting secret $SECRET_NAME in $CURRENT_REPO..."
     if ! gh secret set "$SECRET_NAME" < "$KEY_FILE" -R "$CURRENT_REPO"; then
         echo "❌ Failed to set secret in $CURRENT_REPO."

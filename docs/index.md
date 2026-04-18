@@ -279,8 +279,8 @@ Please:
 ## 📞 Contact
 
 For questions about this documentation:
-- **Issues**: [GitHub Issues](https://github.com/BlueCentre/aspect-workflows-template/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/BlueCentre/aspect-workflows-template/discussions)
+- **Issues**: [GitHub Issues](https://github.com/VitruvianSoftware/aspect-workflows-template/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/VitruvianSoftware/aspect-workflows-template/discussions)
 - **Slack**: #aspect-build on [Bazel Slack](https://slack.bazel.build)
 - **Website**: [aspect.build](https://aspect.build)
 

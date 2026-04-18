@@ -44,11 +44,11 @@ go install github.com/hay-kot/scaffold@latest
 
 ```bash
 # Interactive mode
-SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new github.com/BlueCentre/aspect-workflows-template
+SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new github.com/VitruvianSoftware/aspect-workflows-template
 
 # With preset (non-interactive)
 SCAFFOLD_SETTINGS_RUN_HOOKS=always scaffold new --preset=py --output-dir=my-project \
-  github.com/BlueCentre/aspect-workflows-template
+  github.com/VitruvianSoftware/aspect-workflows-template
 
 cd my-project
 bazel test //...

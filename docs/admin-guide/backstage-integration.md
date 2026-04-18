@@ -502,5 +502,5 @@ templates/
 ## Support
 
 - Bazel Slack: #aspect-build channel
-- GitHub Issues: https://github.com/BlueCentre/aspect-workflows-template/issues
+- GitHub Issues: https://github.com/VitruvianSoftware/aspect-workflows-template/issues
 - Backstage Discord: https://discord.gg/backstage

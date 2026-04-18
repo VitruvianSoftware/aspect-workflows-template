@@ -28,7 +28,7 @@ We follow a standard GitHub workflow with some specific requirements for templat
 
 ### Fork the Repository
 
-1. Visit https://github.com/BlueCentre/aspect-workflows-template
+1. Visit https://github.com/VitruvianSoftware/aspect-workflows-template
 2. Click "Fork" button
 3. Clone your fork:
 
@@ -41,14 +41,14 @@ cd aspect-workflows-template
 
 ```bash
 # Add upstream remote
-git remote add upstream https://github.com/BlueCentre/aspect-workflows-template
+git remote add upstream https://github.com/VitruvianSoftware/aspect-workflows-template
 
 # Verify remotes
 git remote -v
 # origin    https://github.com/YOUR-USERNAME/aspect-workflows-template (fetch)
 # origin    https://github.com/YOUR-USERNAME/aspect-workflows-template (push)
-# upstream  https://github.com/BlueCentre/aspect-workflows-template (fetch)
-# upstream  https://github.com/BlueCentre/aspect-workflows-template (push)
+# upstream  https://github.com/VitruvianSoftware/aspect-workflows-template (fetch)
+# upstream  https://github.com/VitruvianSoftware/aspect-workflows-template (push)
 ```
 
 ### Install Dependencies
@@ -207,7 +207,7 @@ git push origin feature/my-improvement
 
 1. Go to your fork on GitHub
 2. Click "Pull Request" button
-3. Select base: `BlueCentre/aspect-workflows-template:main`
+3. Select base: `VitruvianSoftware/aspect-workflows-template:main`
 4. Select compare: `YOUR-USERNAME/aspect-workflows-template:feature/my-improvement`
 5. Click "Create Pull Request"
 

@@ -43,6 +43,7 @@ func ManageStarterRepos(ctx *pulumi.Context, mainRepoName pulumi.StringInput) er
 			Name:        pulumi.String(preset),
 			Description: pulumi.String(fmt.Sprintf("Aspect Workflows Template for %s", preset)),
 			Visibility:  pulumi.String("public"),
+			IsTemplate:  pulumi.Bool(true),
 			HasIssues:   pulumi.Bool(true),
 			HasProjects: pulumi.Bool(true),
 			HasWiki:     pulumi.Bool(true),

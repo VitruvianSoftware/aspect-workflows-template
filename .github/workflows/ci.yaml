@@ -21,6 +21,7 @@ jobs:
                     - py
                     - kitchen-sink
                     - rust
+                    - swift
                     - ruby
                     - shell
                     - scala

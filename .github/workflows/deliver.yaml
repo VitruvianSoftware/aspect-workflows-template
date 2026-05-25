@@ -16,6 +16,7 @@ jobs:
                     - minimal
                     - py
                     - rust
+                    - swift
                     - ruby
                     - shell
                     - scala
@@ -29,6 +30,7 @@ jobs:
                     - backstage-py
                     - backstage-ruby
                     - backstage-rust
+                    - backstage-swift
                     - backstage-scala
                     - backstage-shell
         runs-on: ubuntu-latest

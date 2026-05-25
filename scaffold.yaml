@@ -49,6 +49,7 @@ questions:
         - Kotlin
         - C & C++
         - Rust
+        - Swift
         - Ruby
         - Shell (Bash)
   - name: codegen
@@ -171,6 +172,7 @@ computed:
   kotlin: "{{ has \"Kotlin\" .Scaffold.langs }}"
   cpp: "{{ has \"C & C++\" .Scaffold.langs }}"
   rust: "{{ has \"Rust\" .Scaffold.langs }}"
+  swift: "{{ has \"Swift\" .Scaffold.langs }}"
   shell: "{{ has \"Shell (Bash)\" .Scaffold.langs }}"
   ruby: "{{ has \"Ruby\" .Scaffold.langs }}"
   # Do we need to bazel_dep on platforms?
@@ -223,6 +225,10 @@ presets:
   backstage-rust:
     backstage: true
     langs: ['Rust']
+    lint: true
+  backstage-swift:
+    backstage: true
+    langs: ['Swift']
     lint: true
   backstage-shell:
     backstage: true
@@ -285,6 +291,9 @@ presets:
     lint: true
   rust:
     langs: ['Rust']
+    lint: true
+  swift:
+    langs: ['Swift']
     lint: true
   ruby:
     langs: ['Ruby']

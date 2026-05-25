@@ -20,6 +20,7 @@ var presets = []string{
 	"py",
 	"ruby",
 	"rust",
+	"swift",
 	"scala",
 	"shell",
 	"backstage-cpp",
@@ -32,6 +33,7 @@ var presets = []string{
 	"backstage-py",
 	"backstage-ruby",
 	"backstage-rust",
+	"backstage-swift",
 	"backstage-scala",
 	"backstage-shell",
 }

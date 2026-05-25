@@ -189,14 +189,43 @@ use_repo(crate, "crates")
 #########################
 # Support for Swift, see https://github.com/bazelbuild/rules_swift
 # Generic cross-platform Swift only (no rules_apple / .app bundling).
-# rules_swift registers its toolchain ("//swift/toolchains:all") from its own
-# MODULE.bazel, so no `use_extension`/`swift.toolchain` tag is required here.
-# The toolchain is non-hermetic: it uses the Swift compiler installed on the
-# host. See https://github.com/bazelbuild/rules_swift#1-install-swift
+#
+# HERMETIC on Linux: the rules_swift `swift` bzlmod extension downloads a
+# standalone Swift toolchain from swift.org, so CI and Linux developers need NO
+# host `swift` install (no swift-actions/setup-swift). NOTE: that extension is
+# only on rules_swift `main` (not the 3.6.1 release), so it is pinned via
+# git_override until it ships in a release -- then drop the override and bump the
+# bazel_dep version. (`CC=clang` is still required: the Swift toolchain links via
+# the configured CC toolchain, and rules_swift requires that to be clang.)
+#
+# macOS keeps the Xcode-based host toolchain (registered LAST as a fallback): the
+# hermetic Linux toolchains are registered FIRST so they win toolchain resolution
+# on Linux, while macOS falls through to the host toolchain. Apple's SDK isn't
+# redistributable, so macOS Swift is Xcode-bound regardless.
 bazel_dep(name = "rules_swift", version = "3.6.1", repo_name = "build_bazel_rules_swift")
+git_override(
+    module_name = "rules_swift",
+    remote = "https://github.com/bazelbuild/rules_swift.git",
+    # main @ 2026-05-22; first ref carrying the hermetic `swift` toolchain
+    # extension (PR #1630). Swap for a stable release once one ships with it.
+    commit = "f9f6fc9e308a18bfb2ea4797fea6c52fe134b980",
+)
 
-# Re-register the Swift toolchains explicitly so the registration is visible at
-# the repo root. This is idempotent with the registration done inside rules_swift.
+swift = use_extension("@build_bazel_rules_swift//swift:extensions.bzl", "swift")
+swift.toolchain(name = "swift_toolchain", swift_version = "6.2.3")
+use_repo(
+    swift,
+    "swift_toolchain",
+    "swift_toolchain_ubuntu24.04",
+    "swift_toolchain_ubuntu24.04-aarch64",
+)
+
+# Hermetic Linux toolchains FIRST (win on Linux); host toolchain LAST (macOS/Xcode
+# fallback, also keeps the registration visible at the repo root).
+register_toolchains(
+    "@swift_toolchain//:swift_toolchain_exec_ubuntu24.04",
+    "@swift_toolchain//:swift_toolchain_exec_ubuntu24.04-aarch64",
+)
 register_toolchains("@build_bazel_rules_swift//swift/toolchains:all")
 {{- if .Scaffold.lint }}
 

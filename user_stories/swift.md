@@ -40,10 +40,13 @@ EOF
 ~~~
 
 We don't have any BUILD file generation for Swift yet,
-so you're forced to create it manually.
+so you're forced to create it manually. We load `swift_binary` from
+`//swift:defs.bzl` -- a thin project-local wrapper around rules_swift's
+`swift_binary` that bundles the hermetic Swift runtime into the binary's runfiles
+on Linux, so `bazel run`/`bazel test` can find libswiftCore at runtime.
 ~~~sh
 touch hello_world/BUILD
-buildozer 'new_load @build_bazel_rules_swift//swift:swift_binary.bzl swift_binary' hello_world:__pkg__
+buildozer 'new_load //swift:defs.bzl swift_binary' hello_world:__pkg__
 buildozer 'new swift_binary hello_world' hello_world:__pkg__
 buildozer 'add srcs main.swift' hello_world:hello_world
 ~~~

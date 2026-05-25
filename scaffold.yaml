@@ -156,6 +156,9 @@ features:
     globs:
       - "*/Cargo.*"
       - "*/.clippy.toml"
+  - value: "{{ .Computed.swift }}"
+    globs:
+      - "*/swift/*"
   - value: "{{ .Scaffold.backstage }}"
     globs:
       - "*/template.yaml"

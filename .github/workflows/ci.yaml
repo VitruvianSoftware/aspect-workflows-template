@@ -28,16 +28,15 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
-            # rules_swift is non-hermetic: it compiles against the host `swift` binary,
-            # which ubuntu-latest does not ship. Install Swift before any Bazel step.
-            - name: Install Swift
-              if: ${{ matrix.preset == 'swift' }}
-              uses: swift-actions/setup-swift@7ca6abe6b3b0e8b5421b88be48feee39cbf52c6a # v2.4.0
-            # rules_swift's Linux toolchain requires the configured CC toolchain to be
-            # LLVM (clang); ubuntu-latest defaults to gcc, so Bazel's auto-detected
-            # @local_config_cc must see CC=clang. Export it before the FIRST bazel
-            # invocation (bazel run //tools:bazel_env) so the cc toolchain is detected
-            # as clang. See https://github.com/bazelbuild/rules_swift#1-install-swift
+            # The Swift toolchain is now HERMETIC: rules_swift's `swift` bzlmod
+            # extension downloads a standalone toolchain from swift.org, so no
+            # swift-actions/setup-swift (host Swift install) step is needed.
+            #
+            # rules_swift's Linux toolchain still links via the configured CC
+            # toolchain, which must be LLVM (clang); ubuntu-latest defaults to gcc,
+            # so Bazel's auto-detected @local_config_cc must see CC=clang. Export it
+            # before the FIRST bazel invocation (bazel run //tools:bazel_env) so the
+            # cc toolchain is detected as clang.
             - name: Use clang as the C/C++ toolchain for Swift
               if: ${{ matrix.preset == 'swift' }}
               run: |

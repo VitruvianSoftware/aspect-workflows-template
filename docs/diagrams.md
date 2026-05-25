@@ -2,6 +2,8 @@
 
 This document contains comprehensive visual diagrams to help understand the Aspect Workflows Template architecture and workflows.
 
+> **Want to understand how developers *consume* the published template repos?** For the two consumption paths (GitHub "Use this template" vs. Backstage) and why the Backstage repos use a `skeleton/` directory, see [Backstage Integration → Visual Overview](./admin-guide/backstage-integration.md#visual-overview).
+
 ## Table of Contents
 
 1. [Overall System Architecture](#overall-system-architecture)

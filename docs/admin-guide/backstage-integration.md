@@ -11,6 +11,73 @@ The template generator operates in two modes:
 
 > **Important**: All commands in this guide use `SCAFFOLD_SETTINGS_RUN_HOOKS=always` to ensure post-generation hooks run. These hooks are essential for copying files into the `skeleton/` directory for Backstage templates.
 
+## Visual Overview
+
+### The big picture (container view)
+
+One source repo feeds an automated pipeline that publishes **24 starter repos** in two flavors, which developers consume in two different ways:
+
+```mermaid
+flowchart TB
+    admin(["Platform admin"])
+    dev(["Developer"])
+
+    subgraph src["Source of truth: VitruvianSoftware/aspect-workflows-template"]
+        tmpl["Scaffold template files<br/>scaffold.yaml, hooks/post_scaffold"]
+        pipe["deliver.yaml<br/>(GitHub Actions)"]
+    end
+
+    subgraph starters["Starter repos (VitruvianSoftware org): 24 total"]
+        plain["12 PLAIN repos<br/>go, py, java, ...<br/><b>GitHub template repos</b>"]
+        bs["12 BACKSTAGE repos<br/>backstage-go, ...<br/><b>Backstage software templates</b><br/>template.yaml + skeleton/"]
+    end
+
+    portal["Backstage portal<br/>(your org's catalog)"]
+    devA(["Developer's new repo<br/>(working Bazel project)"])
+    devB(["Developer's new repo<br/>(working Bazel project)"])
+
+    admin -->|"edits & pushes"| tmpl
+    tmpl -->|"push triggers"| pipe
+    pipe -->|"scaffold + force-push"| plain
+    pipe -->|"scaffold + force-push"| bs
+    admin -->|"registers template.yaml (once)"| portal
+    portal -.->|"reads"| bs
+    dev -->|"Path A: Use this template"| plain
+    dev -->|"Path B: open portal"| portal
+    plain -->|"GitHub copies verbatim"| devA
+    portal -->|"fetch:template ./skeleton, then publish"| devB
+```
+
+### Two ways a developer gets a project
+
+The single most important thing to understand: **plain** starter repos and **backstage** starter repos are consumed through completely different mechanisms.
+
+```mermaid
+flowchart TD
+    start(["I want a new Bazel project"])
+    start --> q{"Which starter<br/>repo am I using?"}
+
+    q -->|"Plain: go, py, ..."| a1["Open the repo on GitHub"]
+    a1 --> a2["Click 'Use this template'"]
+    a2 --> a3["GitHub copies the repo verbatim"]
+    a3 --> aOut(["Working Bazel project"])
+
+    q -->|"Backstage: backstage-go, ..."| b0["One-time: an admin registers<br/>the repo's template.yaml in Backstage"]
+    b0 --> b1["Open Backstage, choose Create,<br/>pick the template"]
+    b1 --> b2["Fill the form:<br/>name, owner, options"]
+    b2 --> b3["Backstage runs template.yaml:<br/>fetch:template ./skeleton, then publish:github"]
+    b3 --> bOut(["Working Bazel project<br/>(rendered from skeleton/)"])
+```
+
+| | Plain repos (`go`, `py`, …) | Backstage repos (`backstage-go`, …) |
+|---|---|---|
+| **Mechanism** | GitHub "Use this template" | Backstage software template |
+| **Setup needed** | none — just click | admin registers `template.yaml` once |
+| **What gets copied** | the whole repo, verbatim | only `skeleton/`, rendered with your answers |
+| **Developer ends up with** | working project | working project |
+
+> Both paths produce a working project. The difference is the *delivery mechanism* — and it's why the backstage repos carry the extra `template.yaml` + `skeleton/` (explained below).
+
 ## Quick Start
 
 ### Direct Generation (Traditional Workflow)
@@ -87,7 +154,7 @@ backstage-templates/aspect-python/
 - `py` - Python only
 - `js` - JavaScript/TypeScript only
 - `go` - Go only
-- `java`, `kotlin`, `cpp`, `rust`, `shell` - Language-specific
+- `java`, `kotlin`, `cpp`, `rust`, `ruby`, `scala`, `shell` - Language-specific
 - `minimal` - Bare bones Bazel setup
 
 ### Backstage Template Presets
@@ -99,10 +166,10 @@ backstage-templates/aspect-python/
 - `backstage-kotlin` - Kotlin template
 - `backstage-cpp` - C++ template
 - `backstage-rust` - Rust template
+- `backstage-ruby` - Ruby template
+- `backstage-scala` - Scala template
 - `backstage-shell` - Shell template
 - `backstage-minimal` - Bare bones template
-
-- `backstage-go` - Go template
 
 ## Detailed Workflows
 
@@ -192,7 +259,45 @@ Backstage creates `https://github.com/YOUR-ORG/payment-service` with full Bazel 
 
 ## Understanding the Skeleton Directory
 
-The `skeleton/` directory (only in Backstage mode) contains **copies** of project files:
+`template.yaml` and `skeleton/` exist **only in Backstage mode**, and they map onto Backstage's "recipe vs. ingredients" model:
+
+```mermaid
+flowchart LR
+    subgraph repo["backstage-go repo = a Backstage software template"]
+        tmpl["template.yaml<br/><b>THE RECIPE</b><br/>form fields + build steps"]
+        skel["skeleton/<br/><b>THE INGREDIENTS</b><br/>files that BECOME the project<br/>(carry Backstage values)"]
+        root["root project files<br/>(a browsable copy;<br/>Backstage ignores these)"]
+    end
+
+    tmpl -->|"step fetch:template<br/>url: ./skeleton"| render["Backstage renders skeleton/<br/>with the developer's answers"]
+    skel --> render
+    render --> out(["Developer's new repo<br/>= skeleton/ contents only<br/>(no template.yaml, no nested skeleton/)"])
+```
+
+Because Backstage's `fetch:template` step reads **only** `./skeleton`, that directory must be a complete copy of the project. That copy is built automatically by the delivery pipeline:
+
+```mermaid
+sequenceDiagram
+    actor Maintainer
+    participant Src as aspect-workflows-template
+    participant CI as deliver.yaml
+    participant SC as scaffold
+    participant Hook as post_scaffold
+    participant Repo as backstage-go repo
+
+    Maintainer->>Src: push (main / platform-v2.0)
+    Src->>CI: triggers deliver (matrix of 24 presets)
+    CI->>SC: scaffold new --preset=backstage-go
+    SC->>SC: render root project + template.yaml + skeleton/
+    SC->>Hook: run post_scaffold (backstage presets only)
+    Hook->>Hook: copy root files into skeleton/ (with exclusions, below)
+    CI->>Repo: git push --force HEAD:main
+    Note over Repo: holds root project + template.yaml + skeleton/ (copy)
+```
+
+This is why a `backstage-*` repo contains the project **twice** — once at the root (browsable) and once under `skeleton/` (what Backstage actually scaffolds from). A plain repo has neither `template.yaml` nor `skeleton/`; it *is* the project.
+
+Inside a backstage repo, the `skeleton/` directory contains **copies** of project files:
 
 ```bash
 skeleton/
@@ -206,15 +311,14 @@ skeleton/
 
 ### How It Works
 
-1. **Post-generation hook**: Copies files from root to `skeleton/`
-2. **Exclusions**: Some files are NOT copied (template.yaml, catalog-info.yaml at root, skeleton itself)
-3. **Backstage Variables**: Files needing `${{ values.* }}` substitution are in `skeleton/` with those variables
+1. **Post-generation hook** (`hooks/post_scaffold`): copies the rendered project files from the repo root into `skeleton/`. Real copies are used, not symlinks, because Backstage's scaffolder does not follow symlinks.
+2. **Exclusions**: these files are deliberately *not* copied into `skeleton/`: `template.yaml`, the root `catalog-info.yaml`, the `skeleton/` directory itself, `README.md`, and `README.bazel.md`.
+3. **Backstage variables**: files kept inside `skeleton/` use Backstage `${{ values.* }}` substitution (rendered when a developer runs the template), not Scaffold `{{ .X }}` syntax.
 
-### Files That Are Unique in Skeleton
+### Files That Are Skeleton-Specific
 
-- `catalog-info.yaml` - Uses Backstage variables for generated project metadata
-- `README.bazel.md` - May include project name variable
-- Any file with `${{ values.* }}` substitutions
+- `skeleton/catalog-info.yaml` — the generated project's catalog entry, using Backstage `${{ values.* }}` variables (the root `catalog-info.yaml` is a `kind: Location` that points Backstage at `template.yaml`, so it is excluded from the copy).
+- `skeleton/README.md` — a skeleton-specific readme (the root `README.md` and `README.bazel.md` are excluded from the copy).
 
 ## Configuration Reference
 

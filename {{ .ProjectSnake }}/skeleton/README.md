@@ -9,15 +9,12 @@ When Backstage mode is enabled, this directory mirrors the parent directory stru
 
 ## File Synchronization
 
-Most files in this skeleton/ directory should be symlinks to the parent directory to avoid duplication:
+At generation time the `post_scaffold` hook **copies** the rendered project files from the parent directory into this `skeleton/` directory. Real copies are used rather than symlinks, because Backstage's scaffolder does not follow symlinks — you don't manage these copies by hand:
 
 ```bash
-# Create symlinks for files that don't need Backstage variables
-ln -s ../.bazelrc .bazelrc
-ln -s ../.bazelversion .bazelversion
-ln -s ../BUILD BUILD
-ln -s ../MODULE.bazel MODULE.bazel
-# ... etc
+# The post_scaffold hook copies parent files into skeleton/ automatically.
+# Excluded from the copy: template.yaml, the root catalog-info.yaml,
+# skeleton/ itself, README.md, and README.bazel.md
 ```
 
 Files that need Backstage-specific templating (like README.bazel.md with project name) should be separate copies with `${{ "{{" }} values.VAR {{ "}}" }}` variables.

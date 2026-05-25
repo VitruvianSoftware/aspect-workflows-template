@@ -33,6 +33,16 @@ jobs:
             - name: Install Swift
               if: ${{ matrix.preset == 'swift' }}
               uses: swift-actions/setup-swift@7ca6abe6b3b0e8b5421b88be48feee39cbf52c6a # v2.4.0
+            # rules_swift's Linux toolchain requires the configured CC toolchain to be
+            # LLVM (clang); ubuntu-latest defaults to gcc, so Bazel's auto-detected
+            # @local_config_cc must see CC=clang. Export it before the FIRST bazel
+            # invocation (bazel run //tools:bazel_env) so the cc toolchain is detected
+            # as clang. See https://github.com/bazelbuild/rules_swift#1-install-swift
+            - name: Use clang as the C/C++ toolchain for Swift
+              if: ${{ matrix.preset == 'swift' }}
+              run: |
+                echo "CC=clang" >> "$GITHUB_ENV"
+                echo "CXX=clang++" >> "$GITHUB_ENV"
             - name: Install Bazel
               uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
               with:

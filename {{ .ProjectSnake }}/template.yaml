@@ -37,6 +37,10 @@ metadata:
   name: bazel-rust
   title: Bazel Rust Monorepo Template
   description: Bazel monorepo for Rust projects
+{{- else if .Computed.swift }}
+  name: bazel-swift
+  title: Bazel Swift Monorepo Template
+  description: Bazel monorepo for Swift projects
 {{- else if .Computed.shell }}
   name: bazel-shell
   title: Bazel Shell Script Monorepo Template
@@ -75,6 +79,9 @@ metadata:
 {{- if .Computed.rust }}
     - rust
 {{- end }}
+{{- if .Computed.swift }}
+    - swift
+{{- end }}
 {{- if .Computed.shell }}
     - shell
 {{- end }}
@@ -97,6 +104,8 @@ metadata:
     - url: https://github.com/VitruvianSoftware/backstage-cpp
 {{- else if .Computed.rust }}
     - url: https://github.com/VitruvianSoftware/backstage-rust
+{{- else if .Computed.swift }}
+    - url: https://github.com/VitruvianSoftware/backstage-swift
 {{- else if .Computed.shell }}
     - url: https://github.com/VitruvianSoftware/backstage-shell
 {{- else }}
@@ -458,6 +467,9 @@ spec:
 {{- end }}
 {{- if .Computed.rust }}
             - Rust
+{{- end }}
+{{- if .Computed.swift }}
+            - Swift
 {{- end }}
 {{- if .Computed.shell }}
             - Shell (Bash)

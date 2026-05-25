@@ -23,6 +23,8 @@ metadata:
   name: cpp-generated-blueprint
 {{- else if .Computed.rust }}
   name: rust-generated-blueprint
+{{- else if .Computed.swift }}
+  name: swift-generated-blueprint
 {{- else if .Computed.shell }}
   name: shell-generated-blueprint
 {{- else if .Computed.ruby }}
@@ -61,6 +63,8 @@ metadata:
   name: cpp-generated-blueprint
 {{- else if .Computed.rust }}
   name: rust-generated-blueprint
+{{- else if .Computed.swift }}
+  name: swift-generated-blueprint
 {{- else if .Computed.shell }}
   name: shell-generated-blueprint
 {{- else if .Computed.ruby }}
@@ -104,6 +108,9 @@ metadata:
 {{- if .Computed.rust }}
     - rust
 {{- end }}
+{{- if .Computed.swift }}
+    - swift
+{{- end }}
 {{- if .Computed.shell }}
     - shell
 {{- end }}
@@ -132,6 +139,8 @@ metadata:
     - url: https://github.com/VitruvianSoftware/cpp
 {{- else if .Computed.rust }}
     - url: https://github.com/VitruvianSoftware/rust
+{{- else if .Computed.swift }}
+    - url: https://github.com/VitruvianSoftware/swift
 {{- else if .Computed.shell }}
     - url: https://github.com/VitruvianSoftware/shell
 {{- else if .Computed.ruby }}

@@ -146,3 +146,29 @@ You can run `cargo` outside of Bazel, using the tool installed on the PATH.
 ```
 
 {{- end -}}
+
+{{ if .Computed.swift -}}
+
+## Working with Swift
+
+This repo uses [rules_swift](https://github.com/bazelbuild/rules_swift) for generic,
+cross-platform Swift (no `rules_apple` / app bundling). The Swift toolchain is
+non-hermetic: it uses the `swift` compiler installed on the host, so make sure Swift
+is installed (see https://github.com/bazelbuild/rules_swift#1-install-swift).
+
+There is no BUILD file generation for Swift yet, so create `BUILD` files manually.
+Declare a binary with `swift_binary` (or a library with `swift_library`):
+
+```python
+load("@build_bazel_rules_swift//swift:swift_binary.bzl", "swift_binary")
+
+swift_binary(
+    name = "hello_world",
+    srcs = ["main.swift"],
+)
+```
+
+Then `bazel run //path/to:hello_world`. Swift sources are formatted with
+[SwiftFormat](https://github.com/nicklockwood/SwiftFormat) via the `format` command.
+
+{{- end -}}

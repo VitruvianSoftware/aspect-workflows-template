@@ -174,6 +174,29 @@ crate.from_cargo(
 
 use_repo(crate, "crates")
 {{- end }}
+{{- if .Computed.swift }}
+
+#########################
+# Support for Swift, see https://github.com/bazelbuild/rules_swift
+# Generic cross-platform Swift only (no rules_apple / .app bundling).
+# rules_swift registers its toolchain ("//swift/toolchains:all") from its own
+# MODULE.bazel, so no `use_extension`/`swift.toolchain` tag is required here.
+# The toolchain is non-hermetic: it uses the Swift compiler installed on the
+# host. See https://github.com/bazelbuild/rules_swift#1-install-swift
+bazel_dep(name = "rules_swift", version = "3.6.1", repo_name = "build_bazel_rules_swift")
+
+# Re-register the Swift toolchains explicitly so the registration is visible at
+# the repo root. This is idempotent with the registration done inside rules_swift.
+register_toolchains("@build_bazel_rules_swift//swift/toolchains:all")
+{{- if .Scaffold.lint }}
+
+# SwiftFormat binary used by rules_lint's format_multirun (see tools/format/BUILD).
+# rules_lint vendors nicklockwood/SwiftFormat via this module extension.
+format_tools = use_extension("@aspect_rules_lint//format:extensions.bzl", "tools")
+format_tools.swiftformat()
+use_repo(format_tools, "swiftformat", "swiftformat_mac")
+{{- end }}
+{{- end }}
 {{- if .Computed.ruby }}
 
 #########################

@@ -41,6 +41,19 @@ java_binary(
 )
 {{ end }}
 
+{{ if .Computed.swift }}
+# SwiftFormat ships separate prebuilt binaries per OS; select the right one.
+# The @swiftformat / @swiftformat_mac repos come from the rules_lint format
+# tools extension declared in MODULE.bazel.
+alias(
+    name = "swiftformat",
+    actual = select({
+        "@bazel_tools//src/conditions:linux": "@swiftformat",
+        "@bazel_tools//src/conditions:darwin": "@swiftformat_mac",
+    }),
+)
+{{ end }}
+
 format_multirun(
     name = "format",
 {{ if .Computed.cpp}}
@@ -60,6 +73,9 @@ format_multirun(
 {{ end }}
 {{ if .Computed.rust }}
     rust = "@rules_rust//tools/rustfmt:upstream_rustfmt",
+{{ end }}
+{{ if .Computed.swift }}
+    swift = ":swiftformat",
 {{ end }}
 {{ if .Computed.shell }}
     shell = "@aspect_rules_lint//format:shfmt",

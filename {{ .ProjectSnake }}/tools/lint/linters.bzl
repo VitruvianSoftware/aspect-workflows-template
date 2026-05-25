@@ -92,6 +92,12 @@ clippy = lint_clippy_aspect(
     config = Label("//:.clippy.toml"),
 )
 {{ end -}}
+{{ if .Computed.swift -}}
+# Swift linting is a deferred best-effort: aspect_rules_lint does not ship a
+# SwiftLint aspect yet, so no lint aspect is wired here. `swift-format`/SwiftFormat
+# still provides formatting via //tools/format. Add a SwiftLint aspect here if and
+# when rules_lint supports it.
+{{ end -}}
 {{ if .Computed.ruby -}}
 rubocop = lint_rubocop_aspect(
     binary = Label("@bundle//bin:rubocop"),

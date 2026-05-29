@@ -192,6 +192,20 @@ features:
     globs:
       - "*/template.yaml"
       - "*/skeleton/**"
+  - value: "{{ .Scaffold.license }}"
+    globs:
+      - "*/LICENSE"
+      - "*/tools/license/*"
+  - value: "{{ .Scaffold.copybara }}"
+    globs:
+      - "*/tools/copybara/**"
+      - "**/_copybara-export.yaml"
+      - "**/_copybara-import.yaml"
+      - "**/copybara-drift-check.yaml"
+      - "*/docs/copybara-bidi-sync.md"
+  - value: "{{ and .Scaffold.copybara .Scaffold.copybara_pulumi_auth }}"
+    globs:
+      - "*/infrastructure/**/copybara_sync/**"
 
 computed:
   kitchen_sink: "{{ eq (len .Scaffold.langs) 8 }}"
@@ -209,6 +223,7 @@ computed:
   ruby: "{{ has \"Ruby\" .Scaffold.langs }}"
   # Do we need to bazel_dep on platforms?
   platforms: "{{ .Scaffold.oci }}"
+  go_or_copybara: "{{ or (has \"Go\" .Scaffold.langs) .Scaffold.copybara }}"
 presets:
   # Backstage template presets
   backstage-kitchen-sink:

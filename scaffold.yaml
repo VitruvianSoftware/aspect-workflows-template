@@ -72,6 +72,35 @@ questions:
     prompt:
       confirm: Setup OCI Containers?
       description: "Install rules_oci; see https://github.com/bazel-contrib/rules_oci"
+  - name: license
+    prompt:
+      confirm: Add license-header enforcement?
+      description: "Generates a LICENSE, an addlicense header check (bazel test //tools/license:check), and a `bazel run //tools/license:add` helper"
+  - name: license_id
+    when: "{{ .Scaffold.license }}"
+    prompt:
+      message: License (SPDX)
+      options:
+        - Apache-2.0
+        - MIT
+        - BSD-3-Clause
+        - MPL-2.0
+  - name: copyright_holder
+    when: "{{ .Scaffold.license }}"
+    prompt:
+      message: Copyright holder (e.g. "Acme, Inc.")
+  - name: copybara
+    prompt:
+      confirm: Add Copybara monorepo<->standalone bidirectional sync?
+      description: "Bazel-run sync engine (export/import/drift/conflict-precheck) for publishing subtrees to standalone repos"
+  - name: copybara_components
+    when: "{{ .Scaffold.copybara }}"
+    prompt:
+      message: "Initial sync component subdirs, comma-separated (blank = none, add later via the runbook)"
+  - name: copybara_pulumi_auth
+    when: "{{ .Scaffold.copybara }}"
+    prompt:
+      confirm: "Also scaffold the GitHub-App + deploy-key Pulumi auth IaC?"
 
 features:
   - value: "{{ .Scaffold.lint }}"

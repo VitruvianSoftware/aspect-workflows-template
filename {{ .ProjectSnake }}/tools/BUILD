@@ -94,7 +94,9 @@ bazel_env(
         "gem": "@ruby//:gem",
         "ruby": "@ruby",
 {{ end }}
-    } | MULTITOOL_TOOLS {{ if .Computed.go }} | GO_TOOLS {{ end }},
+    } | MULTITOOL_TOOLS {{ if .Computed.go }} | GO_TOOLS {{ end }}{{- if .Scaffold.license }} | {
+        "addlicense": "@multitool//tools/addlicense",
+    }{{ end }},
 )
 
 {{ if and .Scaffold.proto .Computed.ruby }}

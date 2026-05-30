@@ -196,6 +196,7 @@ features:
     globs:
       - "*/LICENSE"
       - "*/tools/license/*"
+      - "*/.github/workflows/license-check.yml"
   - value: "{{ .Scaffold.copybara }}"
     globs:
       - "*/tools/copybara/**"

@@ -22,25 +22,25 @@ load("//tools/license:defs.bzl", "addlicense_run_target")
 # Configuration
 # ---------------------------------------------------------------------------
 
-# Globs passed as -ignore flags to addlicense (generated / tool-managed files
-# that should not receive license headers).  Defined as a Starlark string so
-# they're inlined verbatim into the generated launcher shell script.
-_IGNORE_FLAGS = " ".join([
-    "-ignore '**/*.lock'",
-    "-ignore '**/pnpm-lock.yaml'",
-    "-ignore '**/package-lock.json'",
-    "-ignore '**/Cargo.lock'",
-    "-ignore 'MODULE.bazel.lock'",
-    "-ignore '**/gazelle_python.yaml'",
-    "-ignore '**/*-baseline.xml'",
-    "-ignore '**/.release-please-manifest.json'",
-    "-ignore 'bazel-*/**'",
-    "-ignore '**/node_modules/**'",
-    "-ignore '**/*.venv/**'",
-    "-ignore '.git/**'",
-    "-ignore '**/BUILD'",
-    "-ignore '**/BUILD.bazel'",
-])
+# Glob patterns passed as -ignore flags to addlicense (generated / tool-managed
+# files that should not receive license headers).  Each entry is a separate
+# -ignore <pattern> pair in the generated launcher's arg array.
+_IGNORE_GLOBS = [
+    "**/*.lock",
+    "**/pnpm-lock.yaml",
+    "**/package-lock.json",
+    "**/Cargo.lock",
+    "MODULE.bazel.lock",
+    "**/gazelle_python.yaml",
+    "**/*-baseline.xml",
+    "**/.release-please-manifest.json",
+    "bazel-*/**",
+    "**/node_modules/**",
+    "**/*.venv/**",
+    ".git/**",
+    "**/BUILD",
+    "**/BUILD.bazel",
+]
 
 # SPDX ID → addlicense -l value mapping (resolved at scaffold generation time).
 _LICENSE_FLAG = "{{ if eq .Scaffold.license_id `Apache-2.0` }}apache{{ else if eq .Scaffold.license_id `MIT` }}mit{{ else if eq .Scaffold.license_id `BSD-3-Clause` }}bsd{{ else }}mpl{{ end }}"
@@ -57,7 +57,7 @@ addlicense_run_target(
     name = "add",
     check_mode = False,
     copyright = _COPYRIGHT,
-    ignore_flags = _IGNORE_FLAGS,
+    ignore_globs = _IGNORE_GLOBS,
     license_flag = _LICENSE_FLAG,
     visibility = ["//visibility:public"],
 )
@@ -67,7 +67,7 @@ addlicense_run_target(
     name = "check",
     check_mode = True,
     copyright = _COPYRIGHT,
-    ignore_flags = _IGNORE_FLAGS,
+    ignore_globs = _IGNORE_GLOBS,
     license_flag = _LICENSE_FLAG,
     visibility = ["//visibility:public"],
 )

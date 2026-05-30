@@ -1,3 +1,42 @@
+{{ if eq .Scaffold.license_id `Apache-2.0` }}# Copyright {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{{ else if eq .Scaffold.license_id `MIT` }}# Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+{{ else if eq .Scaffold.license_id `BSD-3-Clause` }}# Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }} All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+{{ else }}# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+{{ end }}
 """
 Starlark rule and macro for addlicense run targets.
 
@@ -11,49 +50,60 @@ def _addlicense_launcher_impl(ctx):
     addlicense = ctx.executable.addlicense
     out = ctx.actions.declare_file(ctx.attr.name + ".sh")
 
-    # The launcher script:
-    #  1. cd's to $BUILD_WORKSPACE_DIRECTORY (set by `bazel run` to the workspace root)
-    #  2. Resolves the addlicense binary via the BASH_RUNFILES_DIR / RUNFILES_MANIFEST_FILE
-    #     fallback chain from the Bazel bash runfiles library; simplified here by using
-    #     a path derived from the script's own location.
-    #
-    # We embed the runfiles-relative path of the addlicense binary (computed at build
-    # time via ctx.file.addlicense.short_path) so the launcher can find it at runtime
-    # without needing an external runfiles library.
-    #
-    # short_path for external deps is "../<repo>/<path>" (relative from main repo root).
-    # $RUNFILES_DIR is the runfiles tree root, so the path under it is "<repo>/<path>"
-    # (strip the leading "../").
+    # Compute the rlocation-style runfiles key for the addlicense binary.
+    # ctx.executable.addlicense.short_path for an external dep is "../<repo>/<path>".
+    # rlocation() accepts the runfiles-root-relative path, i.e. without the leading "../".
     short_path = addlicense.short_path
-    runfiles_rel = short_path[3:] if short_path.startswith("../") else short_path
+    rlocation_key = short_path[3:] if short_path.startswith("../") else short_path
+
+    # Build the addlicense args as individual bash-array elements so that values
+    # containing spaces or special characters (e.g. an apostrophe in the copyright
+    # holder name) are passed safely without word-splitting or glob expansion.
+    #
+    # Each element is emitted as a double-quoted bash string.  We escape any
+    # literal double-quote or backslash that appears in the value so the generated
+    # script is syntactically valid regardless of user input.
+    def _bash_quote(s):
+        # Escape backslashes first, then double-quotes.
+        return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+    args_starlark = ctx.attr.addlicense_args  # list of strings
+    array_lines = "\n".join(["  " + _bash_quote(a) for a in args_starlark])
 
     ctx.actions.write(
         output = out,
         is_executable = True,
         content = """\
 #!/usr/bin/env bash
-set -euo pipefail
+# --- begin runfiles.bash initialization v3 ---
+set -uo pipefail; set +e
+f=bazel_tools/tools/bash/runfiles/runfiles.bash
+source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \\
+  source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null || \\
+  source "$0.runfiles/$f" 2>/dev/null || \\
+  source "$(grep -sm1 "^$f " "$0.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \\
+  source "$(grep -sm1 "^$f " "$0.exe.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \\
+  { echo>&2 "ERROR: cannot find runfiles.bash"; exit 1; }; f=; set -e
+# --- end runfiles.bash initialization v3 ---
 
-# Resolve addlicense binary from runfiles.
-# $RUNFILES_DIR is set by Bazel for the executable's runfiles tree root.
-# The manifest fallback handles environments where RUNFILES_DIR is not set.
-if [[ -n "${RUNFILES_DIR:-}" ]]; then
-  ADDLICENSE="$RUNFILES_DIR/%s"
-elif [[ -f "${BASH_SOURCE[0]}.runfiles_manifest" ]]; then
-  ADDLICENSE=$(grep -m1 '^%s ' "${BASH_SOURCE[0]}.runfiles_manifest" | awk '{print $2}')
-else
-  echo "Cannot locate addlicense binary" >&2; exit 1
-fi
+ADDLICENSE="$(rlocation %s)"
+
+# Build args as an array so values with spaces/apostrophes are safe.
+ADDLICENSE_ARGS=(
+%s
+)
 
 # cd to the workspace root (bazel run sets BUILD_WORKSPACE_DIRECTORY).
 cd "$BUILD_WORKSPACE_DIRECTORY"
 
-exec "$ADDLICENSE" %s .
-""" % (runfiles_rel, runfiles_rel, ctx.attr.addlicense_args),
+exec "$ADDLICENSE" "${ADDLICENSE_ARGS[@]}" .
+""" % (rlocation_key, array_lines),
     )
 
+    # Merge in the runfiles for addlicense AND the standard bash runfiles library.
     runfiles = ctx.runfiles(files = [addlicense])
     runfiles = runfiles.merge(ctx.attr.addlicense[DefaultInfo].default_runfiles)
+    runfiles = runfiles.merge(ctx.attr._runfiles_lib[DefaultInfo].default_runfiles)
 
     return [DefaultInfo(
         executable = out,
@@ -69,16 +119,20 @@ _addlicense_launcher = rule(
             mandatory = True,
             doc = "The addlicense binary label.",
         ),
-        "addlicense_args": attr.string(
+        "addlicense_args": attr.string_list(
             mandatory = True,
-            doc = "Flags to pass to addlicense (copyright, license, check, ignores).",
+            doc = "Flags to pass to addlicense as individual array elements (copyright, license, check, ignores).",
+        ),
+        "_runfiles_lib": attr.label(
+            default = Label("@bazel_tools//tools/bash/runfiles"),
+            doc = "Standard Bazel bash runfiles library.",
         ),
     },
     executable = True,
     doc = "Generates a workspace-scanning addlicense launcher for `bazel run`.",
 )
 
-def addlicense_run_target(name, copyright, license_flag, ignore_flags, check_mode, visibility = None):
+def addlicense_run_target(name, copyright, license_flag, ignore_globs, check_mode, visibility = None):
     """Generate a `bazel run` target that invokes addlicense over the workspace.
 
     The generated target cd's to $BUILD_WORKSPACE_DIRECTORY (set by `bazel run`)
@@ -88,18 +142,21 @@ def addlicense_run_target(name, copyright, license_flag, ignore_flags, check_mod
     Args:
         name: target name.
         copyright: copyright holder string (passed as addlicense -c flag).
+            May contain spaces and apostrophes — handled safely via a bash array.
         license_flag: addlicense -l value (apache / mit / bsd / mpl).
-        ignore_flags: space-joined string of -ignore flag pairs.
+        ignore_globs: list of glob pattern strings to ignore (each becomes a
+            separate -ignore <pattern> pair of array elements).
         check_mode: if True, pass -check (verify only; don't modify files).
         visibility: standard Bazel visibility list.
     """
-    check_arg = "-check " if check_mode else ""
-    args = "-c '{copyright}' -l {lid} {check}{ignores}".format(
-        copyright = copyright,
-        lid = license_flag,
-        check = check_arg,
-        ignores = ignore_flags,
-    )
+
+    # Build the args list as individual elements — no word-splitting at runtime.
+    args = ["-c", copyright, "-l", license_flag]
+    if check_mode:
+        args.append("-check")
+    for glob in ignore_globs:
+        args.append("-ignore")
+        args.append(glob)
 
     _addlicense_launcher(
         name = name,

@@ -102,7 +102,7 @@ Flags:
 | `--endpoint <grpcs://host>` | gRPC endpoint (custom provider). |
 | `--header-name <name>` | Auth header name (custom; default `x-buildbuddy-api-key`). |
 | `--key <key>` | API key — prefer the `BUILDBUDDY_API_KEY` env var or the hidden prompt over this flag. |
-| `--yes` | Assume "yes" to confirmations (non-interactive). |
+| `--yes` | Accepted for non-interactive callers (currently a no-op). |
 | `--no-ci` | Configure local builds only; skip the CI secret and snippet. |
 
 Re-running the helper is idempotent: it replaces the prior key header in

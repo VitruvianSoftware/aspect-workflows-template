@@ -22,7 +22,7 @@ set -euo pipefail
 # `bazel run` executes from the runfiles dir; operate on the repo root instead.
 cd "${BUILD_WORKSPACE_DIRECTORY:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 
-PROVIDER="" ENDPOINT="" HEADER_NAME="" KEY="" ASSUME_YES=0 DO_CI=1
+PROVIDER="" ENDPOINT="" HEADER_NAME="" KEY="" DO_CI=1
 SECRET_NAME="BUILDBUDDY_API_KEY"
 
 usage() {
@@ -33,7 +33,7 @@ Usage: bazel run //tools/remote:setup -- [flags]
   --header-name <name>             Auth header name (custom; default x-buildbuddy-api-key)
   --key <key>                      API key (NON-interactive/testing only; prefer the
                                    BUILDBUDDY_API_KEY env var or the hidden prompt)
-  --yes                            Assume "yes" to confirmations (non-interactive)
+  --yes                            Accepted for non-interactive callers (currently a no-op)
   --no-ci                          Configure local builds only; skip CI secret/snippet
   -h, --help                       Show this help
 USAGE
@@ -45,7 +45,7 @@ while [ $# -gt 0 ]; do
     --endpoint)    ENDPOINT="${2:?}"; shift 2 ;;
     --header-name) HEADER_NAME="${2:?}"; shift 2 ;;
     --key)         KEY="${2:?}"; shift 2 ;;
-    --yes|-y)      ASSUME_YES=1; shift ;;
+    --yes|-y)      shift ;;  # accepted; no interactive prompts to skip
     --no-ci)       DO_CI=0; shift ;;
     -h|--help)     usage; exit 0 ;;
     *) echo "unknown argument: $1" >&2; usage; exit 2 ;;
@@ -144,6 +144,7 @@ if [ "$DO_CI" -eq 1 ]; then
   echo "------------------------------------------------------------------"
   echo "    - name: Build/test with RBE"
   echo "      env:"
+  # shellcheck disable=SC2016  # literal GitHub Actions secrets expression; must stay unexpanded in bash
   echo '        '"$SECRET_NAME"': ${{ "{{" }} secrets.'"$SECRET_NAME"' {{ "}}" }}'
   echo "      run: bazel test --config=remote --remote_header=$HEADER_NAME=\$$SECRET_NAME //..."
   echo "------------------------------------------------------------------"
@@ -153,7 +154,7 @@ if [ "$DO_CI" -eq 1 ]; then
     hits=$(grep -rlE 'bazel (build|test)' .github/workflows 2>/dev/null || true)
     if [ -n "$hits" ]; then
       echo "Detected Bazel steps in these workflows — add the env + --config=remote flags to each:"
-      printf '  %s\n' $hits
+      while IFS= read -r _wf; do printf '  %s\n' "$_wf"; done <<<"$hits"
     fi
   fi
 fi

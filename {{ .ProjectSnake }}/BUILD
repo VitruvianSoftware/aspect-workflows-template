@@ -76,6 +76,9 @@ load("@gazelle//:def.bzl", "gazelle")
 # pulumi CLI / //tools/pulumi bazel wrappers — not built by Bazel — so keep
 # gazelle out of them (it otherwise collides with the pulumi_project targets).
 # gazelle:exclude infrastructure
+# tools/pulumi holds a hand-authored macro (defs.bzl) + wrapper scripts; gazelle
+# would otherwise generate a bzl_library with an unresolvable rules_shell dep.
+# gazelle:exclude tools/pulumi
 {{ if .Scaffold.proto -}}
 # Workaround https://github.com/bazel-contrib/bazel-gazelle/issues/2001
 # gazelle:map_kind proto_library proto_library @protobuf//bazel:proto_library.bzl

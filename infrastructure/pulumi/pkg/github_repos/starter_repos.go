@@ -49,6 +49,9 @@ func ManageStarterRepos(ctx *pulumi.Context, mainRepoName pulumi.StringInput) er
 			HasIssues:   pulumi.Bool(true),
 			HasProjects: pulumi.Bool(true),
 			HasWiki:     pulumi.Bool(true),
+			// Auto-delete head branches after merge. No branch protection here:
+			// the deliver pipeline force-pushes generated content to main.
+			DeleteBranchOnMerge: pulumi.Bool(true),
 		}
 		repo, err := github.NewRepository(ctx, preset, repoArgs)
 		if err != nil {

@@ -352,3 +352,15 @@ presets:
     lint: true
   minimal:
     langs: []
+  license-go:
+    langs: ['Go']
+    lint: true
+    license: true
+    license_id: Apache-2.0
+    copyright_holder: "Example Org"
+  copybara-go:
+    langs: ['Go']
+    lint: true
+    copybara: true
+    copybara_components: ""
+    copybara_pulumi_auth: false

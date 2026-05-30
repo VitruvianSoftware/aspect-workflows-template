@@ -140,7 +140,7 @@ features:
       - "*/gazelle_python.yaml"
       - "*/.aspect/gazelle/py*.axl"
       - "*/tools/pytest/*"
-  - value: "{{ .Computed.go }}"
+  - value: "{{ .Computed.go_or_copybara }}"
     globs:
       - "*/go.mod"
       - "*/go.sum"
@@ -224,7 +224,7 @@ computed:
   ruby: "{{ has \"Ruby\" .Scaffold.langs }}"
   # Do we need to bazel_dep on platforms?
   platforms: "{{ .Scaffold.oci }}"
-  go_or_copybara: "{{ or (has \"Go\" .Scaffold.langs) .Scaffold.copybara }}"
+  go_or_copybara: "{{ if or (has \"Go\" .Scaffold.langs) .Scaffold.copybara }}true{{ else }}false{{ end }}"
 presets:
   # Backstage template presets
   backstage-kitchen-sink:

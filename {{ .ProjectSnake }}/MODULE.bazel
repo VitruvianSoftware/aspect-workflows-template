@@ -45,7 +45,7 @@ bazel_dep(name = "bazel_jar_jar", version = "0.1.12", repo_name = None)
 {{- end }}
 
 {{- end }}
-{{- if .Computed.go }}
+{{- if .Computed.go_or_copybara }}
 #########################
 # Go
 bazel_dep(name = "rules_go", version = "0.59.0")

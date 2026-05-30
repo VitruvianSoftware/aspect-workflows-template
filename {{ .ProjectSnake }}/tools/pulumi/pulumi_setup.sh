@@ -47,6 +47,16 @@ if [ "$missing" -ne 0 ]; then
 fi
 echo "✓ pulumi and go are installed."
 
+# --- Make the standalone module build-ready --------------------------------
+# These Pulumi modules are standalone Go modules (own go.mod), deliberately kept
+# out of any repo-level go.work. Disable workspace mode so `go mod tidy` (and the
+# `go build` Pulumi runs later) resolve from THIS module — otherwise, inside a
+# monorepo with a go.work, they fail with "not a known dependency".
+export GOWORK=off
+echo "Resolving Go dependencies (go mod tidy)…"
+go mod tidy
+echo "✓ go.sum is up to date."
+
 # --- Login (idempotent) ----------------------------------------------------
 if pulumi whoami >/dev/null 2>&1; then
   echo "✓ Already logged in to Pulumi as '$(pulumi whoami 2>/dev/null)'."

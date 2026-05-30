@@ -93,11 +93,33 @@ func main() {
 		},
 			pulumi.Import(pulumi.ID(repoName)),
 			pulumi.IgnoreChanges([]string{
+				// We manage ONLY DeleteBranchOnMerge; ignore drift on every other
+				// attribute so adopting a brownfield repo never clobbers settings
+				// the developer owns (homepage, merge buttons, feature flags, the
+				// generated-from-template marker, topics, etc.).
 				"description",
+				"homepageUrl",
 				"visibility",
 				"hasIssues",
 				"hasProjects",
 				"hasWiki",
+				"hasDownloads",
+				"hasDiscussions",
+				"isTemplate",
+				"template",
+				"topics",
+				"allowForking",
+				"allowMergeCommit",
+				"allowSquashMerge",
+				"allowRebaseMerge",
+				"allowAutoMerge",
+				"mergeCommitTitle",
+				"mergeCommitMessage",
+				"squashMergeCommitTitle",
+				"squashMergeCommitMessage",
+				"vulnerabilityAlerts",
+				"securityAndAnalysis",
+				"pages",
 				"name",
 			}),
 		)

@@ -95,11 +95,13 @@ mkdir -p tools
   echo "common:remote --remote_timeout=10m"
   echo "common:remote --jobs=50"
   echo "common:remote --remote_download_outputs=minimal"
-  echo "# Default Linux execution platform/container for RBE actions. Adjust the"
-  echo "# container-image to match your toolchains. NOTE: macOS targets cannot run on"
-  echo "# Linux RBE — keep them local (e.g. --strategy=...=local). See docs/remote-build.md."
+  echo "# Default Linux execution platform/container for RBE actions. The image must"
+  echo "# ship a modern glibc (>=2.28) for current Node/Python toolchains — BuildBuddy's"
+  echo "# old executor-docker-default (Ubuntu 16.04) is too old and breaks Node. Adjust"
+  echo "# to match your toolchains. NOTE: macOS targets cannot run on Linux RBE — keep"
+  echo "# them local (e.g. --strategy=...=local). See docs/remote-build.md."
   echo "common:remote --remote_default_exec_properties=OSFamily=linux"
-  echo "common:remote --remote_default_exec_properties=container-image=docker://gcr.io/flame-public/executor-docker-default:enterprise-v1.6.0"
+  echo "common:remote --remote_default_exec_properties=container-image=docker://gcr.io/flame-public/rbe-ubuntu20-04:latest"
 } > tools/remote.bazelrc
 echo "✓ Wrote tools/remote.bazelrc (commit this — it is non-secret)."
 

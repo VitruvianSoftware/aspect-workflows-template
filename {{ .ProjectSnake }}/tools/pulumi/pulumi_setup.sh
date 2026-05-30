@@ -124,24 +124,36 @@ case "$PROJECT_DIR" in
       read -r -p "Enable Pulumi preview on pull requests? [y/N] " ENABLE_PREVIEW || true
       case "${ENABLE_PREVIEW:-N}" in
         [yY] | [yY][eE][sS])
-          gh variable set REPO_CONFIG_PREVIEW_ENABLED --body true
-          echo "✓ REPO_CONFIG_PREVIEW_ENABLED=true (preview will run on pull requests)."
+          if gh variable set REPO_CONFIG_PREVIEW_ENABLED --body true; then
+            echo "✓ REPO_CONFIG_PREVIEW_ENABLED=true (preview will run on pull requests)."
+          else
+            echo "! Failed to set REPO_CONFIG_PREVIEW_ENABLED (gh not authenticated, or insufficient repo perms?) — skipping." >&2
+          fi
           ;;
         *)
-          gh variable set REPO_CONFIG_PREVIEW_ENABLED --body false
-          echo "✓ REPO_CONFIG_PREVIEW_ENABLED=false (preview-on-PR disabled)."
+          if gh variable set REPO_CONFIG_PREVIEW_ENABLED --body false; then
+            echo "✓ REPO_CONFIG_PREVIEW_ENABLED=false (preview-on-PR disabled)."
+          else
+            echo "! Failed to set REPO_CONFIG_PREVIEW_ENABLED (gh not authenticated, or insufficient repo perms?) — skipping." >&2
+          fi
           ;;
       esac
 
       read -r -p "Enable Pulumi apply on merge (auto-up)? [y/N] " ENABLE_APPLY || true
       case "${ENABLE_APPLY:-N}" in
         [yY] | [yY][eE][sS])
-          gh variable set REPO_CONFIG_AUTO_APPLY --body true
-          echo "✓ REPO_CONFIG_AUTO_APPLY=true (merges to the default branch will 'up')."
+          if gh variable set REPO_CONFIG_AUTO_APPLY --body true; then
+            echo "✓ REPO_CONFIG_AUTO_APPLY=true (merges to the default branch will 'up')."
+          else
+            echo "! Failed to set REPO_CONFIG_AUTO_APPLY (gh not authenticated, or insufficient repo perms?) — skipping." >&2
+          fi
           ;;
         *)
-          gh variable set REPO_CONFIG_AUTO_APPLY --body false
-          echo "✓ REPO_CONFIG_AUTO_APPLY=false (apply-on-merge disabled)."
+          if gh variable set REPO_CONFIG_AUTO_APPLY --body false; then
+            echo "✓ REPO_CONFIG_AUTO_APPLY=false (apply-on-merge disabled)."
+          else
+            echo "! Failed to set REPO_CONFIG_AUTO_APPLY (gh not authenticated, or insufficient repo perms?) — skipping." >&2
+          fi
           ;;
       esac
 

@@ -35,6 +35,10 @@ new Pulumi program logic; it only orchestrates the wrappers that already exist.
 4. **Least-privilege GitHub App** for auth (`Administration: write` +
    `Contents: read`); short-lived installation tokens minted per run;
    `PULUMI_ACCESS_TOKEN` for Pulumi Cloud state; App credentials Pulumi-provisioned.
+5. **App created via GitHub's App Manifest flow** (browser-side redirect to
+   `localhost` — no public endpoint, no UI permission hand-config), driven by a
+   `:setup`-integrated / `:create-app` helper. Strongly preferred over manual UI
+   App creation for developer experience.
 
 ## Architecture
 
@@ -106,8 +110,29 @@ After the existing bootstrap (prereqs → login → stack select/init → adopt 
   and export them as `GITHUB_TOKEN` for the Pulumi github provider.
 - `PULUMI_ACCESS_TOKEN` stored as an Actions secret for Pulumi Cloud state.
 - App **credentials** placed via a small Pulumi auth module mirroring the existing
-  `copybara_sync` auth IaC (reproducible, not click-ops). The App itself is a
-  one-time manual operator bootstrap (as the copybara dispatch App was).
+  `copybara_sync` auth IaC (reproducible, not click-ops).
+
+**App bootstrap — Manifest flow (no public endpoint, no UI hand-config).**
+A `:setup`-integrated helper (or a dedicated `//tools/pulumi:create-app` target)
+drives GitHub's App Manifest flow:
+1. Build a manifest (name, `default_permissions: {administration: write,
+   contents: read}`, events, `redirect_url: http://localhost:<port>/callback`).
+2. Open the browser to an auto-submitting local HTML form that POSTs the manifest
+   to `https://github.com/settings/apps/new` (user) or
+   `https://github.com/organizations/<org>/settings/apps/new` (org).
+3. The operator clicks **"Create GitHub App"** once — permissions are pre-filled.
+4. GitHub redirects the **browser** to `localhost:<port>/callback?code=…`; a
+   throwaway local server captures the `code`. **Fallback:** operator copies the
+   `code` from the URL bar and pastes it (works with no local server at all).
+5. `POST /app-manifests/<code>/conversions` (unauthenticated; **outbound HTTPS
+   only**) returns the App `id`, private-key `pem`, and secrets.
+6. Pulumi places those credentials as repo secrets; CI then mints installation tokens.
+
+Because the redirect is **browser-side**, this needs **no public endpoint and no
+inbound network** — only outbound HTTPS to github.com. App creation + installation
+need the operator's browser once; CI is fully headless. **Two-host note:** if the
+shell host has no browser, use the manual code-paste fallback or run the bootstrap
+on the host that has the browser.
 
 ## Reuse (don't reinvent)
 
@@ -122,8 +147,11 @@ After the existing bootstrap (prereqs → login → stack select/init → adopt 
 1. **Render:** generate a preset — both `_repo-config-*.yaml` render cleanly (no
    stray `{{ }}`), born-green headers; `deliver` matrix stays green (workflows
    present but inert because the vars are unset).
-2. **Setup:** in vitruvian-core, run `:setup`, answer yes/yes → `gh variable list`
-   shows both vars `true`; confirm App token + `PULUMI_ACCESS_TOKEN` secrets exist.
+2. **App bootstrap + setup:** run the manifest-flow helper (localhost redirect) →
+   confirm it creates the App and returns an `id` + `pem` with no public endpoint
+   (and the manual code-paste fallback also works); Pulumi places them as secrets.
+   Then in vitruvian-core run `:setup`, answer yes/yes → `gh variable list` shows
+   both vars `true`; confirm App token + `PULUMI_ACCESS_TOKEN` secrets exist.
 3. **Preview:** open a PR touching `repo_config/` → preview workflow runs, posts
    the diff comment, mutates nothing.
 4. **Apply:** merge → apply workflow runs `:up`, applies, CI green; verify the

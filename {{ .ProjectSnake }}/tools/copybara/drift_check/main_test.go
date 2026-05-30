@@ -45,6 +45,17 @@ import (
 	"testing"
 )
 
+func makeSymlink(t *testing.T, dir, rel, target string) {
+	t.Helper()
+	full := filepath.Join(dir, rel)
+	if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(target, full); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // ---------------------------------------------------------------------------
 // helpers
 // ---------------------------------------------------------------------------
@@ -231,5 +242,107 @@ func TestCompareDirs_DotGitExcluded(t *testing.T) {
 	}
 	if len(diffs) != 0 {
 		t.Errorf("expected no diffs (.git excluded), got: %v", diffs)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// compareDirs unit tests — symlink / presence cases
+// ---------------------------------------------------------------------------
+
+// TestCompareDirs_SymlinkIdentical: same symlink on both sides → no diff.
+func TestCompareDirs_SymlinkIdentical(t *testing.T) {
+	a := t.TempDir()
+	b := t.TempDir()
+	makeSymlink(t, a, "link.txt", "target.txt")
+	makeSymlink(t, b, "link.txt", "target.txt")
+
+	diffs, err := compareDirs(a, b, defaultExcluded())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(diffs) != 0 {
+		t.Errorf("expected no diffs (identical symlinks), got: %v", diffs)
+	}
+}
+
+// TestCompareDirs_SymlinkTargetDiffers: symlink with differing target → diff.
+func TestCompareDirs_SymlinkTargetDiffers(t *testing.T) {
+	a := t.TempDir()
+	b := t.TempDir()
+	makeSymlink(t, a, "link.txt", "target_a.txt")
+	makeSymlink(t, b, "link.txt", "target_b.txt")
+
+	diffs, err := compareDirs(a, b, defaultExcluded())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(diffs) != 1 || diffs[0] != "link.txt" {
+		t.Errorf("expected [link.txt] (differing symlink targets), got: %v", diffs)
+	}
+}
+
+// TestCompareDirs_SymlinkOnlyInA: symlink present only in dirA → diff.
+func TestCompareDirs_SymlinkOnlyInA(t *testing.T) {
+	a := t.TempDir()
+	b := t.TempDir()
+	makeSymlink(t, a, "link.txt", "target.txt")
+
+	diffs, err := compareDirs(a, b, defaultExcluded())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(diffs) != 1 || diffs[0] != "link.txt" {
+		t.Errorf("expected [link.txt] (symlink only in A), got: %v", diffs)
+	}
+}
+
+// TestCompareDirs_SymlinkOnlyInB: symlink present only in dirB → diff.
+func TestCompareDirs_SymlinkOnlyInB(t *testing.T) {
+	a := t.TempDir()
+	b := t.TempDir()
+	makeSymlink(t, b, "link.txt", "target.txt")
+
+	diffs, err := compareDirs(a, b, defaultExcluded())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(diffs) != 1 || diffs[0] != "link.txt" {
+		t.Errorf("expected [link.txt] (symlink only in B), got: %v", diffs)
+	}
+}
+
+// TestCompareDirs_FileVsSymlinkTypeMismatch: a path that is a regular file on
+// one side and a symlink on the other → diff.
+func TestCompareDirs_FileVsSymlinkTypeMismatch(t *testing.T) {
+	a := t.TempDir()
+	b := t.TempDir()
+	writeFile(t, a, "entry", "content\n")
+	makeSymlink(t, b, "entry", "target.txt")
+
+	diffs, err := compareDirs(a, b, defaultExcluded())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(diffs) != 1 || diffs[0] != "entry" {
+		t.Errorf("expected [entry] (file vs symlink type mismatch), got: %v", diffs)
+	}
+}
+
+// TestCompareDirs_EmptyDirOnlyInA: an empty directory present only in dirA → diff.
+// (git doesn't track empty dirs so this is largely moot in practice, but
+// compareDirs reports presence differences faithfully like `diff -r`.)
+func TestCompareDirs_EmptyDirOnlyInA(t *testing.T) {
+	a := t.TempDir()
+	b := t.TempDir()
+	if err := os.Mkdir(filepath.Join(a, "emptydir"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	diffs, err := compareDirs(a, b, defaultExcluded())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(diffs) != 1 || diffs[0] != "emptydir" {
+		t.Errorf("expected [emptydir] (empty dir only in A), got: %v", diffs)
 	}
 }

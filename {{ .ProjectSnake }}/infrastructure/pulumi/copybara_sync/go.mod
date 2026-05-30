@@ -1,6 +1,6 @@
 module github.com/YOUR_GITHUB_ORG/{{ .ProjectKebab }}/infrastructure/pulumi/copybara_sync
 
-go 1.26.1
+go 1.24.1
 
 require (
 	github.com/pulumi/pulumi-github/sdk/v6 v6.12.2

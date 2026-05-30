@@ -67,77 +67,130 @@ func defaultExcluded() map[string]bool {
 }
 
 // ---------------------------------------------------------------------------
-// compareDirs recursively walks dirA and dirB, ignoring entries whose
-// BASENAME is in excludeBasenames at any depth. It returns the list of
-// relative paths that differ (content mismatch, or present in only one side).
+// entryInfo records every non-excluded entry seen while walking a tree.
 // ---------------------------------------------------------------------------
 
-func compareDirs(dirA, dirB string, excludeBasenames map[string]bool) ([]string, error) {
-	seen := map[string]bool{}
-	var diffs []string
+type entryKind int
 
-	// Walk dirA: check each file against dirB.
-	err := filepath.Walk(dirA, func(pathA string, info os.FileInfo, err error) error {
+const (
+	kindFile    entryKind = iota // regular file
+	kindSymlink                  // symbolic link
+	kindDir                      // directory
+)
+
+type entryInfo struct {
+	kind       entryKind
+	content    []byte // regular files only
+	symlinkDst string // symlinks only
+}
+
+// walkTree walks root and records every non-excluded entry (file, symlink,
+// directory) into the returned map keyed by relative path.
+// Excluded basenames are skipped at any depth; excluded directories are pruned
+// with filepath.SkipDir so their contents are never visited.
+func walkTree(root string, excludeBasenames map[string]bool) (map[string]entryInfo, error) {
+	entries := make(map[string]entryInfo)
+
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		base := filepath.Base(pathA)
+		base := filepath.Base(path)
 		if excludeBasenames[base] {
-			if info.IsDir() {
+			if d.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
 		}
-		if info.IsDir() {
-			return nil
+		rel, _ := filepath.Rel(root, path)
+		if rel == "." {
+			return nil // skip the root itself
 		}
-		rel, _ := filepath.Rel(dirA, pathA)
-		seen[rel] = true
-		pathB := filepath.Join(dirB, rel)
-		contA, readErrA := os.ReadFile(pathA)
-		if readErrA != nil {
-			return readErrA
+
+		// Use Lstat to get the true entry type (WalkDir uses Lstat already for
+		// DirEntry.Type(), but we call it explicitly for symlink target reading).
+		fi, lstatErr := os.Lstat(path)
+		if lstatErr != nil {
+			return lstatErr
 		}
-		contB, readErrB := os.ReadFile(pathB)
-		if os.IsNotExist(readErrB) {
-			diffs = append(diffs, rel)
-			return nil
-		}
-		if readErrB != nil {
-			return readErrB
-		}
-		if !bytes.Equal(contA, contB) {
-			diffs = append(diffs, rel)
+
+		switch {
+		case fi.Mode()&os.ModeSymlink != 0:
+			target, readErr := os.Readlink(path)
+			if readErr != nil {
+				return readErr
+			}
+			entries[rel] = entryInfo{kind: kindSymlink, symlinkDst: target}
+		case fi.IsDir():
+			entries[rel] = entryInfo{kind: kindDir}
+		default:
+			// Regular file (or other non-symlink, non-dir type — treat as file).
+			content, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return readErr
+			}
+			entries[rel] = entryInfo{kind: kindFile, content: content}
 		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
+	return entries, nil
+}
 
-	// Walk dirB: find files not in dirA (content diffs already handled above).
-	err = filepath.Walk(dirB, func(pathB string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		base := filepath.Base(pathB)
-		if excludeBasenames[base] {
-			if info.IsDir() {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		if info.IsDir() {
-			return nil
-		}
-		rel, _ := filepath.Rel(dirB, pathB)
-		if !seen[rel] {
-			diffs = append(diffs, rel)
-		}
-		return nil
-	})
+// ---------------------------------------------------------------------------
+// compareDirs recursively walks dirA and dirB, ignoring entries whose
+// BASENAME is in excludeBasenames at any depth. It returns the list of
+// relative paths that differ (content mismatch, present on only one side,
+// type mismatch, or symlink target mismatch). This matches the semantics of
+// `diff -r -x <excluded>`.
+// ---------------------------------------------------------------------------
+
+func compareDirs(dirA, dirB string, excludeBasenames map[string]bool) ([]string, error) {
+	treeA, err := walkTree(dirA, excludeBasenames)
 	if err != nil {
 		return nil, err
+	}
+	treeB, err := walkTree(dirB, excludeBasenames)
+	if err != nil {
+		return nil, err
+	}
+
+	var diffs []string
+
+	// Check every entry in A against B.
+	for rel, infoA := range treeA {
+		infoB, inB := treeB[rel]
+		if !inB {
+			// Present only in A.
+			diffs = append(diffs, rel)
+			continue
+		}
+		if infoA.kind != infoB.kind {
+			// Type mismatch (e.g. file on one side, symlink/dir on the other).
+			diffs = append(diffs, rel)
+			continue
+		}
+		switch infoA.kind {
+		case kindFile:
+			if !bytes.Equal(infoA.content, infoB.content) {
+				diffs = append(diffs, rel)
+			}
+		case kindSymlink:
+			if infoA.symlinkDst != infoB.symlinkDst {
+				diffs = append(diffs, rel)
+			}
+		case kindDir:
+			// Directory presence is the same on both sides — no content to compare.
+		}
+	}
+
+	// Check entries in B not present in A.
+	for rel := range treeB {
+		if _, inA := treeA[rel]; !inA {
+			diffs = append(diffs, rel)
+		}
 	}
 
 	return diffs, nil

@@ -96,7 +96,14 @@ EOF
 # tiny self-submitting HTML form is the standard, endpoint-agnostic way to do it.
 # The JSON contains double quotes, so the attribute is single-quoted (the JSON
 # has no single quotes, so this is safe).
-HTML_FILE="$(mktemp -t pulumi-create-app.XXXXXX.html)"
+# Portable temp file that reliably ends in '.html' so the browser auto-renders
+# the form. BSD/GNU 'mktemp -t' disagree on prefixes vs. suffixes, so create a
+# plain temp file and rename it with the extension.
+HTML_FILE="$(mktemp "${TMPDIR:-/tmp}/pulumi-create-app.XXXXXX")"
+mv "$HTML_FILE" "$HTML_FILE.html"
+HTML_FILE="$HTML_FILE.html"
+# One cleanup covers every exit path (errors under 'set -e', Ctrl-C at prompts).
+trap 'rm -f "$HTML_FILE"' EXIT
 cat >"$HTML_FILE" <<EOF
 <!doctype html>
 <html>
@@ -134,8 +141,10 @@ echo "In the browser: review the pre-filled permissions and click 'Create GitHub
 # present we make a best-effort one-shot capture first, then fall back to paste.
 CODE=""
 # Best-effort one-shot listener; needs both 'nc' and 'timeout' (so it can't hang
-# forever). If either is missing we simply skip to the paste path below — which
-# is the supported primary path and works on its own.
+# forever). This convenience is Linux-oriented — stock macOS 'nc'/'timeout' flags
+# differ and it will simply be skipped there. The paste path below is the
+# guaranteed primary path and works on its own, so a missing/incompatible 'nc' is
+# harmless.
 if command -v nc >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1; then
   echo
   echo "Listening on localhost:8723 for the redirect (best-effort)…"
@@ -153,7 +162,6 @@ if [ -z "$CODE" ]; then
 fi
 if [ -z "$CODE" ]; then
   echo "! No code captured; cannot complete App creation. Re-run and paste the code." >&2
-  rm -f "$HTML_FILE"
   exit 1
 fi
 
@@ -162,13 +170,18 @@ fi
 # and reuses the operator's HTTPS/proxy config.
 echo
 echo "Exchanging the code for App credentials…"
-CONVERSION="$(gh api --method POST "/app-manifests/$CODE/conversions")"
+# A failed POST (e.g. expired/invalid code) can return a non-JSON error body that
+# would crash jq under 'set -e'; surface a clear message instead.
+if ! CONVERSION="$(gh api --method POST "/app-manifests/$CODE/conversions")"; then
+  echo "! Failed to exchange the code (the code may have expired or is invalid —" >&2
+  echo "  re-run and paste a fresh code)." >&2
+  exit 1
+fi
 APP_ID="$(printf '%s' "$CONVERSION" | jq -r '.id')"
 APP_SLUG="$(printf '%s' "$CONVERSION" | jq -r '.slug')"
 APP_PEM="$(printf '%s' "$CONVERSION" | jq -r '.pem')"
 if [ -z "$APP_ID" ] || [ "$APP_ID" = "null" ] || [ -z "$APP_PEM" ] || [ "$APP_PEM" = "null" ]; then
   echo "! Conversion did not return an App id/pem (the code may have expired). Re-run." >&2
-  rm -f "$HTML_FILE"
   exit 1
 fi
 echo "✓ Created GitHub App '$APP_SLUG' (id: $APP_ID)."
@@ -193,7 +206,6 @@ else
 fi
 
 # --- Install the App -------------------------------------------------------
-rm -f "$HTML_FILE"
 echo
 echo "Done. Install the App on '$OWNER' (and the repos that should opt in):"
 echo "    https://github.com/apps/$APP_SLUG/installations/new"

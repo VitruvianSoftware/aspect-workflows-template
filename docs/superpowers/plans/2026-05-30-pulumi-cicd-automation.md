@@ -36,11 +36,13 @@ The central-stack workflow (`infra-preview.yaml`) lives in the **template-genera
 - **Create** `.github/workflows/infra-preview.yaml` (generator repo root).
 - **Modify** `{{ "{{ .ProjectSnake }}" }}/infrastructure/pulumi/repo_config/README.md` — document the automation + manifest flow + the two variables.
 
-**Resolved open items:** (a) credentials are placed by the `:create-app`/`:setup` helper via `gh secret set` using the operator's `gh` (avoids the Pulumi chicken-and-egg of needing a token to provision the token) — NOT a new Pulumi module; (b) preview comments use `marocchino/sticky-pull-request-comment` (single updating comment); (c) default to **per-repo BYO App** via the manifest flow, with a documented option to reuse one org App (set the same `APP_ID`/`APP_PRIVATE_KEY` secrets across repos).
+**Resolved open items:** (a) credentials are placed via `gh` by the operator (using their authenticated `gh`), NOT a Pulumi module (avoids the chicken-and-egg of needing a token to provision the token); (b) preview comments use `marocchino/sticky-pull-request-comment` (single updating comment); (c) **single shared org App** for VitruvianSoftware's repos — `:create-app` runs **once** against the org manifest endpoint and sets **org-level** `PULUMI_APP_ID` (variable) + `APP_PRIVATE_KEY` (secret) + `PULUMI_ACCESS_TOKEN` (secret), which all org repos inherit; per-repo `:setup` then only sets the two **toggle** variables and ensures the App is installed on the repo. (App ID is non-sensitive → an org *variable*; the private key + Pulumi token are org *secrets*.)
 
 ---
 
 ## Task 1: App Manifest-flow bootstrap helper
+
+> **Shared org App:** this target is run **once per GitHub org** (e.g. VitruvianSoftware). It creates ONE App and sets **org-level** credentials that all org repos inherit — it is NOT run per-repo.
 
 **Files:**
 - Create: `{{ "{{ .ProjectSnake }}" }}/tools/pulumi/create_app.sh`
@@ -52,9 +54,9 @@ The central-stack workflow (`infra-preview.yaml`) lives in the **template-genera
   - Build the manifest JSON (heredoc): `name`, `url`, `redirect_url: http://localhost:8723/cb`, `public: false`, `default_permissions: {administration: write, contents: read}`, `default_events: []`.
   - Write a temp HTML file with an auto-submitting `<form method="post" action="https://github.com/settings/apps/new?state=…">` (org → `…/organizations/$OWNER/settings/apps/new`) carrying `<input name="manifest" value='…'>`; `open`/`xdg-open` it (print the path if no opener).
   - Capture the `code`: try a one-shot `nc -l 8723` localhost capture; **fallback** — prompt `read -r CODE` ("paste the `code=` value from the browser URL").
-  - Exchange: `gh api --method POST /app-manifests/$CODE/conversions` → parse `.id`, `.pem`, `.client_id`.
-  - `gh secret set APP_ID --body "$id" -R "$OWNER/$repo"` and `printf '%s' "$pem" | gh secret set APP_PRIVATE_KEY -R "$OWNER/$repo"` (never echo the pem).
-  - Print the App's install URL (`https://github.com/apps/<slug>/installations/new`) and instruct the operator to install it on the repo.
+  - Exchange: `gh api --method POST /app-manifests/$CODE/conversions` → parse `.id`, `.pem`, `.slug`.
+  - Set **org-level** credentials (shared across all org repos): `gh variable set PULUMI_APP_ID --org "$OWNER" --visibility all --body "$id"`; `printf '%s' "$pem" | gh secret set APP_PRIVATE_KEY --org "$OWNER" --visibility all` (never echo the pem); prompt for + `gh secret set PULUMI_ACCESS_TOKEN --org "$OWNER" --visibility all` (read silently).
+  - Print the App's install URL (`https://github.com/apps/<slug>/installations/new`) and instruct the operator to install it on the org / target repos.
 - [ ] **Step 2: shellcheck** — `shellcheck create_app.sh` → clean (mirror the RBE `setup.sh` lint bar).
 - [ ] **Step 3: Add the Bazel target** in `defs.bzl` (repo-level, outside `pulumi_project`):
   ```python
@@ -72,7 +74,7 @@ The central-stack workflow (`infra-preview.yaml`) lives in the **template-genera
 - [ ] **Step 1:** After the existing `go mod tidy` block (repo_config case), add an **automation opt-in** section:
   - `read -r -p "Enable Pulumi preview on pull requests? [y/N] " ANS` → `gh variable set REPO_CONFIG_PREVIEW_ENABLED --body $([ "$ANS" = y ] && echo true || echo false)`.
   - Same for `"Enable Pulumi apply on merge (auto-up)? [y/N]"` → `REPO_CONFIG_AUTO_APPLY`.
-  - If `gh secret list` lacks `APP_ID`/`APP_PRIVATE_KEY`, offer: "No Pulumi App credentials found — run `bazel run //…:create-app`?" and print the `PULUMI_ACCESS_TOKEN` secret hint (`gh secret set PULUMI_ACCESS_TOKEN`).
+  - Credentials are **org-level** (set once by `:create-app`), so `:setup` does NOT set per-repo creds. It instead: (a) checks the org provides `PULUMI_APP_ID` (variable) + `APP_PRIVATE_KEY` + `PULUMI_ACCESS_TOKEN` (secrets) via `gh variable list --org`/`gh secret list --org` — if missing, points the operator at `bazel run //…:create-app`; (b) verifies/prints the App-installation URL so the org App is installed on this repo.
   - EOF-safe defaults (`|| true`, default `N`) so non-interactive `bazel test` never hangs.
 - [ ] **Step 2: shellcheck** clean.
 - [ ] **Step 3: Render check** — generate a preset; `pulumi_setup.sh` renders cleanly; born-green header intact.

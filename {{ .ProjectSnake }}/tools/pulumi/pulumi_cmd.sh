@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+{{- if .Scaffold.license }}
+# {{ if eq .Scaffold.license_id `Apache-2.0` }}Copyright {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.{{ else if eq .Scaffold.license_id `MIT` }}Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# SPDX-License-Identifier: MIT{{ else if eq .Scaffold.license_id `BSD-3-Clause` }}Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }} All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause{{ else }}Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# SPDX-License-Identifier: MPL-2.0{{ end }}
+{{- end }}
+#
+# Generic Pulumi subcommand wrapper — invoked via `bazel run`, never directly.
+#
+# The calling `sh_binary` bakes in two leading args via `args = [<dir>, <subcmd>]`:
+#   $1  workspace-relative path to the Pulumi project directory
+#   $2  the pulumi subcommand to run (preview|up|destroy|refresh|config|...)
+# Anything a developer appends after `--` is forwarded verbatim to pulumi, e.g.
+#   bazel run //infrastructure/pulumi/repo_config:up -- --stack dev --yes
+#
+# Pulumi compiles and runs the Go program itself; Bazel only launches the CLI
+# from the real workspace tree (not the sandboxed runfiles dir).
+set -euo pipefail
+
+# `bazel run` executes from the runfiles dir; operate on the project dir instead.
+PROJECT_DIR="$1"
+SUBCMD="$2"
+shift 2
+
+if ! command -v pulumi >/dev/null 2>&1; then
+  echo "pulumi CLI not found on PATH. Run 'bazel run //$PROJECT_DIR:setup' first," >&2
+  echo "or install it from https://www.pulumi.com/docs/install/." >&2
+  exit 1
+fi
+
+cd "${BUILD_WORKSPACE_DIRECTORY:?this target must be invoked via 'bazel run', not 'bazel test'}/$PROJECT_DIR"
+
+exec pulumi "$SUBCMD" "$@"

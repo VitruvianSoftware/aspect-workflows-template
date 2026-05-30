@@ -1,0 +1,118 @@
+{{ if .Scaffold.license }}{{ if eq .Scaffold.license_id `Apache-2.0` }}# Copyright {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{{ else if eq .Scaffold.license_id `MIT` }}# Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+{{ else if eq .Scaffold.license_id `BSD-3-Clause` }}# Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }} All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+{{ else }}# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+{{ end }}{{ end }}name: Copybara Drift Check
+
+# FAIL-LOUD divergence detector for the bidirectional sync, across ALL components.
+#
+# The sync itself does NOT fail loud on a true conflict: if the same content is
+# edited on both repos within one sync cycle, each direction overwrites the other
+# and the repos silently DIVERGE. This job closes that gap: for each component it
+# compares monorepo/<component>/ against the standalone repo root (applying the
+# same context-file excludes) and goes RED if they differ.
+#
+# A component is only checked once it has been SEEDED (its standalone history
+# carries the MONOREPO_REV_ID label); un-seeded components are skipped, not failed.
+#
+# Runs: right after each sync (workflow_run), on a 30-minute schedule (backstop),
+# and on demand.
+#
+# RUNBOOK — fill in these two values before enabling:
+#   1. GITHUB_ORG env var below: set to your GitHub organisation name.
+#   2. COMPONENTS env var below: space-separated list of component names.
+#      Must match the subdirectory names under the monorepo root AND the
+#      standalone repository names (e.g. "my-lib other-lib").
+#   3. Add a secret per component: <COMPONENT_UPPER>_SYNC_SSH_KEY
+#      (e.g. MY_LIB_SYNC_SSH_KEY for component "my-lib").
+#   4. Update the workflow_run trigger list below to match your per-component
+#      export/import workflow names.
+on:
+    workflow_run:
+        # TODO: replace with your per-component caller workflow names once added,
+        # e.g. "Copybara Export (my-lib)" / "Copybara Import (my-lib)".
+        # The placeholder below keeps the workflow valid until you add real callers.
+        workflows:
+            - "Copybara Export (placeholder)"
+            - "Copybara Import (placeholder)"
+        types: [completed]
+    schedule:
+        - cron: "*/30 * * * *"
+    workflow_dispatch: {}
+
+permissions:
+    contents: read
+
+concurrency:
+    group: copybara-drift-check
+    cancel-in-progress: true
+
+jobs:
+    drift-check:
+        runs-on: ubuntu-latest
+        env:
+            # TODO: set to your GitHub organisation (e.g. "my-org").
+            GITHUB_ORG: YOUR_GITHUB_ORG
+            # TODO: space-separated component names (subdirs + standalone repo names).
+            # Example: "my-lib other-lib"
+            COMPONENTS: ""
+            # Add one secret per component: <COMPONENT_UPPER>_SYNC_SSH_KEY.
+            # GitHub Actions cannot index secrets by a variable, so list them explicitly.
+            # Example (uncomment and repeat for each component):
+            # MY_LIB_SYNC_SSH_KEY: ${{ "{{ secrets.MY_LIB_SYNC_SSH_KEY }}" }}
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Install Bazel
+              uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
+              with:
+                  bazelisk-cache: true
+                  repository-cache: true
+                  bazelrc: |
+                      common --announce_rc --color=yes --curses=yes
+                      common --show_progress_rate_limit=60 --show_timestamps
+
+            - name: Check all seeded components for drift (fail on divergence)
+              run: |
+                  # bazel run //tools/copybara/drift_check handles SSH key rotation
+                  # per-component (reads <COMP_UPPER>_SYNC_SSH_KEY from env), clones
+                  # each standalone, and fails if any seeded component has diverged.
+                  # shellcheck disable=SC2086
+                  bazel run //tools/copybara/drift_check -- \
+                    --org "$GITHUB_ORG" \
+                    "$GITHUB_WORKSPACE" \
+                    $COMPONENTS

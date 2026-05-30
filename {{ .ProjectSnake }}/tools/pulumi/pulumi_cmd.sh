@@ -37,4 +37,10 @@ fi
 
 cd "${BUILD_WORKSPACE_DIRECTORY:?this target must be invoked via 'bazel run', not 'bazel test'}/$PROJECT_DIR"
 
+# These Pulumi modules are standalone Go modules (their own go.mod), deliberately
+# kept out of any repo-level go.work. Disable workspace mode so Pulumi's internal
+# `go build` resolves dependencies from THIS module — otherwise, inside a monorepo
+# that has a go.work, the build fails with "not a known dependency".
+export GOWORK=off
+
 exec pulumi "$SUBCMD" "$@"

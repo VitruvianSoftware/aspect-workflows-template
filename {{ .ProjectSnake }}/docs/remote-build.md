@@ -86,6 +86,16 @@ build:remote --strategy=SwiftCompile=local
 generated `tools/remote.bazelrc` already pins `OSFamily=linux` as the default
 remote exec platform.
 
+## Execution image
+
+RBE actions run inside the container set by `container-image` in
+`tools/remote.bazelrc`. The default is `gcr.io/flame-public/rbe-ubuntu20-04`
+(Ubuntu 20.04, glibc 2.31) — modern enough for current Node/Python toolchains.
+Avoid BuildBuddy's older `executor-docker-default` (Ubuntu 16.04): its glibc is
+too old and Node fails with `version 'GLIBC_2.28' not found`. If your build needs
+a newer runtime or extra system packages, point `container-image` at a suitable
+image.
+
 ## Non-interactive use
 
 Everything is scriptable, which is what the verification tests use:

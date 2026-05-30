@@ -40,6 +40,23 @@ _IGNORE_GLOBS = [
     ".git/**",
     "**/BUILD",
     "**/BUILD.bazel",
+    # Bazel module and repo manifests (declaration files, not source)
+    "MODULE.bazel",
+    "REPO.bazel",
+    # Tool/formatter configuration files
+    ".rubocop.yml",
+    ".clippy.toml",
+    "prettier.config.cjs",
+    "pmd.xml",
+    "pyproject.toml",
+    "mkdocs.yml",
+    "**/pnpm-workspace.yaml",
+    "Gemfile",
+    "Cargo.toml",
+    # Backstage catalog descriptor
+    "catalog-info.yaml",
+    # Devcontainer files
+    ".devcontainer/**",
 ]
 
 # SPDX ID → addlicense -l value mapping (resolved at scaffold generation time).

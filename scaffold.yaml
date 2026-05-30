@@ -72,6 +72,35 @@ questions:
     prompt:
       confirm: Setup OCI Containers?
       description: "Install rules_oci; see https://github.com/bazel-contrib/rules_oci"
+  - name: license
+    prompt:
+      confirm: Add license-header enforcement?
+      description: "Generates a LICENSE, an addlicense header check (bazel test //tools/license:check), and a `bazel run //tools/license:add` helper"
+  - name: license_id
+    when: "{{ .Scaffold.license }}"
+    prompt:
+      message: License (SPDX)
+      options:
+        - Apache-2.0
+        - MIT
+        - BSD-3-Clause
+        - MPL-2.0
+  - name: copyright_holder
+    when: "{{ .Scaffold.license }}"
+    prompt:
+      message: Copyright holder (e.g. "Acme, Inc.")
+  - name: copybara
+    prompt:
+      confirm: Add Copybara monorepo<->standalone bidirectional sync?
+      description: "Bazel-run sync engine (export/import/drift/conflict-precheck) for publishing subtrees to standalone repos"
+  - name: copybara_components
+    when: "{{ .Scaffold.copybara }}"
+    prompt:
+      message: "Initial sync component subdirs, comma-separated (blank = none, add later via the runbook)"
+  - name: copybara_pulumi_auth
+    when: "{{ .Scaffold.copybara }}"
+    prompt:
+      confirm: "Also scaffold the GitHub-App + deploy-key Pulumi auth IaC?"
 
 features:
   - value: "{{ .Scaffold.lint }}"
@@ -111,7 +140,7 @@ features:
       - "*/gazelle_python.yaml"
       - "*/.aspect/gazelle/py*.axl"
       - "*/tools/pytest/*"
-  - value: "{{ .Computed.go }}"
+  - value: "{{ .Computed.go_or_copybara }}"
     globs:
       - "*/go.mod"
       - "*/go.sum"
@@ -163,6 +192,21 @@ features:
     globs:
       - "*/template.yaml"
       - "*/skeleton/**"
+  - value: "{{ .Scaffold.license }}"
+    globs:
+      - "*/LICENSE"
+      - "*/tools/license/*"
+      - "*/.github/workflows/license-check.yml"
+  - value: "{{ .Scaffold.copybara }}"
+    globs:
+      - "*/tools/copybara/**"
+      - "**/_copybara-export.yaml"
+      - "**/_copybara-import.yaml"
+      - "**/copybara-drift-check.yaml"
+      - "*/docs/copybara-bidi-sync.md"
+  - value: "{{ and .Scaffold.copybara .Scaffold.copybara_pulumi_auth }}"
+    globs:
+      - "*/infrastructure/**/copybara_sync/**"
 
 computed:
   kitchen_sink: "{{ eq (len .Scaffold.langs) 8 }}"
@@ -180,6 +224,7 @@ computed:
   ruby: "{{ has \"Ruby\" .Scaffold.langs }}"
   # Do we need to bazel_dep on platforms?
   platforms: "{{ .Scaffold.oci }}"
+  go_or_copybara: "{{ if or (has \"Go\" .Scaffold.langs) .Scaffold.copybara }}true{{ else }}false{{ end }}"
 presets:
   # Backstage template presets
   backstage-kitchen-sink:
@@ -307,3 +352,15 @@ presets:
     lint: true
   minimal:
     langs: []
+  license-go:
+    langs: ['Go']
+    lint: true
+    license: true
+    license_id: Apache-2.0
+    copyright_holder: "Example Org"
+  copybara-go:
+    langs: ['Go']
+    lint: true
+    copybara: true
+    copybara_components: ""
+    copybara_pulumi_auth: false

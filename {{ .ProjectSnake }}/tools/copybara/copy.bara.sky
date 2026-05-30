@@ -1,0 +1,246 @@
+{{ if .Scaffold.license }}{{ if eq .Scaffold.license_id `Apache-2.0` }}# Copyright {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{{ else if eq .Scaffold.license_id `MIT` }}# Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }}
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+{{ else if eq .Scaffold.license_id `BSD-3-Clause` }}# Copyright (c) {{ now.Year }} {{ .Scaffold.copyright_holder }} All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+{{ else }}# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+{{ end }}{{ end }}# tools/copybara/copy.bara.sky
+#
+# Copybara configuration for bidirectionally syncing each monorepo component
+# subfolder with its standalone GitHub repo.
+#
+# For each component this file generates TWO workflows by loop:
+#   - export_<comp>  : monorepo <comp>/  -> standalone repo root  (push to `main`)
+#   - import_<comp>  : standalone root   -> monorepo <comp>/      (push to `main`)
+# (`-` in a component name becomes `_` in the workflow name, e.g.
+#  export_my_service.) The first run against a fresh destination (no rev-id
+# baseline yet) needs a one-time `--force` to seed the baseline; normal runs use
+# --ignore-noop and rely on the rev-id labels below.
+#
+# ---------------------------------------------------------------------------
+# LOOP PREVENTION (bidirectional, on-push peer sync)
+# ---------------------------------------------------------------------------
+# In a peer bidirectional setup an EXPORTed change must not bounce back as an
+# IMPORT (and vice-versa), or the two repos ping-pong forever. We prevent this
+# with two cooperating mechanisms (BOTH required):
+#
+#   1. Distinct per-direction rev-id labels.
+#      By default Copybara stamps every migrated change with `GitOrigin-RevId`.
+#      If BOTH directions used that default label they could not tell their own
+#      footprint apart from the peer's. Instead each direction stamps the
+#      destination with its OWN label (see `experimental_custom_rev_id` below):
+#        - export stamps `MONOREPO_REV_ID`     (change came FROM the monorepo)
+#        - import stamps `<COMPONENT>_REV_ID`   (change came FROM the standalone)
+#
+#      LABEL SCOPING (why these names are safe across components):
+#        * The EXPORT label is the same literal `MONOREPO_REV_ID` for every
+#          component because each export stamps a DIFFERENT standalone repo; a
+#          component's import only ever sees its own export's stamps (in its own
+#          standalone), so there is no cross-component collision.
+#        * The IMPORT label MUST be unique per component (`DEVX_REV_ID`,
+#          `HOMELAB_REV_ID`, ...) because every import stamps the SHARED monorepo;
+#          a per-component label lets each export's skip-guard recognise exactly
+#          its own component's imported commits.
+#
+#   2. A dynamic transform that SKIPs (no-op) any change already carrying the
+#      OTHER direction's label. `ctx.find_label(name)` returns the label value
+#      or None; if the peer's label is present the change originated from the
+#      peer, so we `core.fail_with_noop(...)` to drop it instead of migrating
+#      it back. This NOOP (exit code 4) is what breaks the loop.
+#
+# COPYBARA VERSION NOTE (important for upgrades):
+#   This config was designed for `olivr/copybara` (build date 2023-01,
+#   "Unknown version"). That build:
+#     - exposes the parameter as `experimental_custom_rev_id` (NOT the newer
+#       `custom_rev_id` -- the rename landed in Copybara ~late-2023), and
+#     - enforces the older label format `[A-Z][A-Z_0-9]{1,30}_REV_ID`
+#       (hence `MONOREPO_REV_ID` / `<COMPONENT>_REV_ID`; the modern `Xxx-RevId`
+#       form is NOT accepted by this build).
+#   On a CURRENT Copybara, make exactly these two edits (logic is identical):
+#     - rename `experimental_custom_rev_id` -> `custom_rev_id`, and
+#     - the `_REV_ID` labels keep working (modern format is a superset).
+#
+# HISTORY MODE (ITERATIVE -- required for correct bidi; do NOT use SQUASH):
+#   We migrate one commit at a time so the skip guard runs PER COMMIT, dropping
+#   only the peer-origin commits while migrating the genuine ones.
+#
+#   SQUASH is WRONG here: it evaluates the skip guard over the labels of the
+#   WHOLE squashed range, so a range that merely *contains* a peer-origin commit
+#   is skipped ENTIRELY -- including genuine changes batched with it.
+#   ITERATIVE fixes this.
+#
+# AUTH SPLIT: in CI the monorepo is reached over HTTPS authenticated by the
+# workflow's GITHUB_TOKEN (which only has access to this repo); each standalone
+# is reached over SSH using that component's write deploy key
+# (<COMPONENT>_SYNC_SSH_KEY). Both an HTTPS credential store and an SSH key are
+# mounted with no URL rewriting, so the two schemes coexist, selected per URL.
+#
+# See docs/copybara-bidi-sync.md for the full onboarding runbook.
+
+# EDIT: set your GitHub organization/user that owns both this monorepo and the
+# standalone repos. See docs/copybara-bidi-sync.md for details.
+GITHUB_ORG = "YOUR_GITHUB_ORG"  # EDIT: your GitHub org (see docs/copybara-bidi-sync.md)
+
+MONOREPO = "https://github.com/" + GITHUB_ORG + "/{{ .ProjectKebab }}.git"
+STANDALONE_SSH_PREFIX = "git@github.com:" + GITHUB_ORG + "/"
+AUTHOR = "{{ .Project }} Sync <sync@example.com>"
+
+# The EXPORT label, shared across components (stamped on each separate standalone
+# repo -- see LABEL SCOPING above). Format constrained by the pinned Copybara
+# build to `[A-Z][A-Z_0-9]{1,30}_REV_ID`.
+MONOREPO_REV_ID = "MONOREPO_REV_ID"
+
+# Monorepo-only files: gazelle-generated Bazel BUILD files live throughout each
+# component subtree. They exist ONLY in the monorepo; the sync must never export
+# them to the standalone nor delete them on import. The explicit top-level entries
+# belt-and-suspender the `**/` form in case a given Copybara build does not treat
+# `**` as matching zero path segments.
+def _monorepo_only(component):
+    return [
+        component + "/**/BUILD",
+        component + "/**/BUILD.bazel",
+        component + "/BUILD",
+        component + "/BUILD.bazel",
+    ]
+
+# Source of truth for which components are synced and their per-component knobs.
+#   name              : monorepo subfolder name == standalone repo name
+#   standalone_rev_id : the per-component IMPORT label (must be unique; see above)
+#   standalone_only   : files that exist ONLY in the standalone repo and must
+#                       never cross into the monorepo nor be deleted by export.
+#                       The dispatch workflow is standalone-only for every
+#                       component.
+#
+# To add a component later, append a dict here and follow the onboarding runbook
+# in docs/copybara-bidi-sync.md (§8f).
+COMPONENTS = [
+{{- range $c := splitList "," .Scaffold.copybara_components }}{{- $t := trim $c }}{{- if $t }}
+    {"name": "{{ $t }}", "standalone_rev_id": "{{ toUpper (replace "-" "_" $t) }}_REV_ID", "standalone_only": [".github/workflows/sync-to-monorepo.yaml"]},
+{{- end }}{{- end }}
+]
+
+
+def _make_skip_guard(workflow_name, peer_label, origin_desc):
+    """Return a dynamic-transform impl that NO-OPs any change already carrying
+    the peer direction's rev-id label (i.e. a change the peer sync brought in),
+    breaking the export<->import loop. The factory captures `peer_label` per call
+    so each generated workflow checks exactly its own peer's label.
+    """
+    def _guard(ctx):
+        if ctx.find_label(peer_label):
+            core.fail_with_noop(
+                workflow_name + ": skipping change that originated from "
+                + origin_desc + " (carries " + peer_label + ").")
+
+    return _guard
+
+
+# Generate the export+import workflow pair for every component.
+#
+# Copybara's Starlark (like Bazel's) forbids top-level `for` STATEMENTS, so the
+# loop body lives in a function driven by a top-level list comprehension (which
+# IS allowed). core.workflow registers each workflow as a side effect of the call.
+def _define_component(_c):
+    _name = _c["name"]
+    _wf = _name.replace("-", "_")
+    _standalone = STANDALONE_SSH_PREFIX + _name + ".git"
+    _standalone_rev_id = _c["standalone_rev_id"]
+    _standalone_only = _c["standalone_only"]
+    _monorepo_only_files = _monorepo_only(_name)
+
+    # Export: <monorepo>/<name>/  ->  <standalone>/<name> (repo root)
+    core.workflow(
+        name = "export_" + _wf,
+        origin = git.origin(
+            url = MONOREPO,
+            ref = "main",
+        ),
+        destination = git.destination(
+            url = _standalone,
+            fetch = "main",
+            push = "main",
+        ),
+        # Component subtree minus the monorepo-only Bazel BUILD files.
+        origin_files = glob([_name + "/**"], exclude = _monorepo_only_files),
+        # Manage all standalone files EXCEPT the standalone-only ones (the sync
+        # must never delete the dispatch workflow).
+        destination_files = glob(["**"], exclude = _standalone_only),
+        authoring = authoring.pass_thru(default = AUTHOR),
+        mode = "ITERATIVE",
+        # Stamp the monorepo's own rev-id, and drop any change the import
+        # direction brought in (carries the per-component standalone label).
+        experimental_custom_rev_id = MONOREPO_REV_ID,
+        transformations = [
+            core.dynamic_transform(impl = _make_skip_guard(
+                "export_" + _wf, _standalone_rev_id, "the standalone " + _name + " repo")),
+            # Strip the `<name>/` prefix so the component lands at the repo root.
+            core.move(_name, ""),
+        ],
+    )
+
+    # Import: <standalone>/<name> (repo root)  ->  <monorepo>/<name>/
+    core.workflow(
+        name = "import_" + _wf,
+        origin = git.origin(
+            url = _standalone,
+            ref = "main",
+        ),
+        destination = git.destination(
+            url = MONOREPO,
+            fetch = "main",
+            push = "main",
+        ),
+        # Standalone-only files must never be imported into the Bazel monorepo.
+        origin_files = glob(["**"], exclude = _standalone_only),
+        # Manage the monorepo's <name>/ EXCEPT the monorepo-only Bazel BUILD
+        # files so the sync never deletes them.
+        destination_files = glob([_name + "/**"], exclude = _monorepo_only_files),
+        authoring = authoring.pass_thru(default = AUTHOR),
+        mode = "ITERATIVE",
+        # Stamp the standalone's own per-component rev-id, and drop any change the
+        # export direction pushed out (carries the monorepo label).
+        experimental_custom_rev_id = _standalone_rev_id,
+        transformations = [
+            core.dynamic_transform(impl = _make_skip_guard(
+                "import_" + _wf, MONOREPO_REV_ID, "the {{ .ProjectKebab }} monorepo")),
+            # Re-add the `<name>/` prefix so the standalone root lands under the
+            # component directory in the monorepo.
+            core.move("", _name),
+        ],
+    )
+
+
+# Drive the generator for every component (top-level comprehension, not a `for`).
+[_define_component(_c) for _c in COMPONENTS]

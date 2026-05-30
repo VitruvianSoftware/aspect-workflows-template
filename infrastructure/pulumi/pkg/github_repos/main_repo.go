@@ -19,14 +19,30 @@ func ManageMainRepo(ctx *pulumi.Context) (*github.Repository, error) {
 		return nil, err
 	}
 
-	// Best-practice protection on the default branch: require a PR (and an
-	// up-to-date branch) before merging, and block force-pushes and branch
-	// deletion. NOTE: starter repos are intentionally NOT protected — the
-	// deliver pipeline force-pushes generated content to their main branch
+	// Best-practice protection on the default branch (`main`) and the active
+	// integration branch (`platform-v2.0`): require a PR (and an up-to-date
+	// branch) before merging, and block force-pushes and branch deletion.
+	// enforceAdmins is left false so repo owners can still sync `main` from the
+	// upstream template. NOTE: starter repos are intentionally NOT protected —
+	// the deliver pipeline force-pushes generated content to their main branch
 	// (see starter_repos.go).
-	_, err = github.NewBranchProtection(ctx, "aspect-workflows-template-default-protection", &github.BranchProtectionArgs{
+	for _, branch := range []string{"main", "platform-v2.0"} {
+		if err := protectBranch(ctx, repo, branch); err != nil {
+			return nil, err
+		}
+	}
+
+	return repo, nil
+}
+
+// protectBranch applies the standard best-practice protection rule to a single
+// branch pattern on repo: require a PR with an up-to-date branch, and block
+// force-pushes and deletion. enforceAdmins is intentionally left at its default
+// (false) so owners retain an escape hatch (e.g. mirroring `main` upstream).
+func protectBranch(ctx *pulumi.Context, repo *github.Repository, branch string) error {
+	_, err := github.NewBranchProtection(ctx, "aspect-workflows-template-"+branch+"-protection", &github.BranchProtectionArgs{
 		RepositoryId: repo.NodeId,
-		Pattern:      pulumi.String("main"),
+		Pattern:      pulumi.String(branch),
 		RequiredPullRequestReviews: github.BranchProtectionRequiredPullRequestReviewArray{
 			&github.BranchProtectionRequiredPullRequestReviewArgs{
 				RequiredApprovingReviewCount: pulumi.Int(0),
@@ -40,9 +56,5 @@ func ManageMainRepo(ctx *pulumi.Context) (*github.Repository, error) {
 		AllowsForcePushes: pulumi.Bool(false),
 		AllowsDeletions:   pulumi.Bool(false),
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return repo, nil
+	return err
 }

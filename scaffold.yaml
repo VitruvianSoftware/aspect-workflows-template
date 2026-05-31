@@ -207,6 +207,39 @@ features:
   - value: "{{ and .Scaffold.copybara .Scaffold.copybara_pulumi_auth }}"
     globs:
       - "*/infrastructure/**/copybara_sync/**"
+  # Per-language dependency-versioning docs. docs/dependency-versioning/index.md
+  # (the language-agnostic One Version Rule model) is delivered unconditionally;
+  # each language page below ships only when that language is selected.
+  - value: "{{ .Computed.python }}"
+    globs:
+      - "*/docs/dependency-versioning/python.md"
+  - value: "{{ .Computed.javascript }}"
+    globs:
+      - "*/docs/dependency-versioning/javascript.md"
+  - value: "{{ .Computed.go }}"
+    globs:
+      - "*/docs/dependency-versioning/go.md"
+  - value: "{{ .Computed.java }}"
+    globs:
+      - "*/docs/dependency-versioning/java.md"
+  - value: "{{ .Computed.kotlin }}"
+    globs:
+      - "*/docs/dependency-versioning/kotlin.md"
+  - value: "{{ .Computed.scala }}"
+    globs:
+      - "*/docs/dependency-versioning/scala.md"
+  - value: "{{ .Computed.rust }}"
+    globs:
+      - "*/docs/dependency-versioning/rust.md"
+  - value: "{{ .Computed.cpp }}"
+    globs:
+      - "*/docs/dependency-versioning/cpp.md"
+  - value: "{{ .Computed.ruby }}"
+    globs:
+      - "*/docs/dependency-versioning/ruby.md"
+  - value: "{{ .Computed.swift }}"
+    globs:
+      - "*/docs/dependency-versioning/swift.md"
 
 computed:
   kitchen_sink: "{{ eq (len .Scaffold.langs) 8 }}"

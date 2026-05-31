@@ -47,6 +47,12 @@ graph TB
 
 ## Automated Updates with Renovate
 
+> [!IMPORTANT]
+> The `renovate.json` described here lives in the **template repository** and keeps the
+> template's *own* dependencies current. It is **not** delivered into generated projects — a
+> freshly generated repo ships with no dependency-update bot. Add Renovate or Dependabot to the
+> generated repo yourself, per your team's preference.
+
 ### Renovate Configuration
 
 The template includes `renovate.json` in the root:
@@ -486,6 +492,17 @@ require (
 
 ## Conflict Resolution
 
+This monorepo follows the **One Version Rule**: each language resolves third-party packages
+through a single shared hub (one `pip` lock, one `maven_install.json`, one `go.work`, one
+`pnpm-lock.yaml`, one `Cargo.lock`, one `Gemfile.lock`), so by default there is exactly one
+version of each dependency. That keeps the build graph coherent and turns conflicts into
+build-time decisions instead of runtime surprises. The strategies below are ordered — **converge
+first**, and only diverge when you must.
+
+> Generated repos ship a per-language guide on exactly this topic at `docs/dependency-versioning/`
+> — an always-present `index.md` (the model + decision tree) plus one page per selected language
+> with the precise mechanics. Keep that doc set in sync when these strategies change.
+
 ### Dependency Conflicts
 
 **Identifying conflicts:**
@@ -543,6 +560,32 @@ maven.install(
     ]
 )
 ```
+
+#### Strategy 4: Separate the dependency closures
+
+When two apps genuinely need different versions, give each its own closure so they stop sharing
+the dependency:
+
+- **Python** — a second `pip.parse(hub_name = "pip_legacy", ...)` with its own lock; the app
+  depends on `@pip_legacy//...`.
+- **JVM (Java/Kotlin/Scala)** — a named `maven.install(name = "maven_legacy", ...)`; targets
+  depend on `@maven_legacy//...`.
+- **Go** — move the app into its own module kept *out* of `go.work` so it resolves its own
+  `go.mod` independently.
+
+This works as long as the two versions end up in **separate** binaries/processes.
+
+#### Strategy 5: Native multi-version, shading, or isolation
+
+- **JavaScript (pnpm)** and **Rust (Cargo)** are nesting resolvers — they already keep multiple
+  versions side by side, so no special handling is needed.
+- If two incompatible versions must live in the **same** binary (one JVM classpath, one Python
+  interpreter, one linked C/C++ binary), separate closures won't help: **shade**/relocate one
+  (JVM), vendor it, or split into separate processes.
+- For repos using the Copybara sync, publishing a component to its **standalone repo** gives it a
+  fully independent dependency closure — the ultimate isolation boundary.
+
+See the generated `docs/dependency-versioning/` set for the per-language commands and snippets.
 
 ## Best Practices
 

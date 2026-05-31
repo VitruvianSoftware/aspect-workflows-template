@@ -41,6 +41,28 @@ Bazel fetches and caches dependencies
 Use in BUILD files
 ```
 
+## Different versions across projects (the One Version Rule)
+
+This monorepo resolves each language's third-party packages through a **single shared hub**, so
+by default there is exactly one version of each dependency across the whole repo — the *One
+Version Rule*. It keeps builds coherent and surfaces conflicts early.
+
+When two projects genuinely need different versions of the same library (or a lagging transitive
+dependency holds one back):
+
+1. **Converge first** — bump the lagging consumer or pin the shared dependency to one version.
+   Usually possible, always cheapest.
+2. **Nesting ecosystems are free** — JavaScript (pnpm) and Rust (Cargo) already allow multiple
+   versions side by side.
+3. **Flat ecosystems: separate the closure** — a second `pip` hub, a named `maven` install, or a
+   Go module outside `go.work`. The projects stop sharing that dependency (works across separate
+   binaries).
+4. **Same binary, both versions** — shade/relocate, vendor, or split into separate processes.
+
+Your generated repo ships the full, per-language version of this guide at
+`docs/dependency-versioning/` — an always-present `index.md` plus one page per language you
+selected. Start there for the exact commands and snippets.
+
 ## Python Dependencies
 
 ### Adding Dependencies
@@ -526,6 +548,11 @@ cargo outdated
 ## Updating Dependencies
 
 ### Automated Updates with Renovate
+
+> [!IMPORTANT]
+> The `renovate.json` below lives in the **template repository** and updates the template's own
+> dependencies. It is **not** delivered into generated projects — a generated repo ships with no
+> dependency-update bot, so add Renovate or Dependabot to it yourself.
 
 The template includes `renovate.json`:
 

@@ -87,9 +87,12 @@ jobs:
                   GITHUB_TOKEN: ${{ "{{ steps.app-token.outputs.token }}" }}
                   GITHUB_OWNER: ${{ "{{ github.repository_owner }}" }}
                   PULUMI_ACCESS_TOKEN: ${{ "{{ secrets.PULUMI_ACCESS_TOKEN }}" }}
-              run: bazel run //infrastructure/pulumi/repo_config:preview -- --stack dev --diff 2>&1 | tee /tmp/repo-config-preview.txt
+              run: |
+                  set -o pipefail
+                  bazel run //infrastructure/pulumi/repo_config:preview -- --stack dev --diff 2>&1 | tee /tmp/repo-config-preview.txt
 
             - name: Post preview diff as a PR comment
+              if: ${{ "{{ always() }}" }}
               uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
               with:
                   header: repo-config-preview

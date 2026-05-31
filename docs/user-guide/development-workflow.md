@@ -98,6 +98,10 @@ bazel run gazelle
 aspect test //src/mymodule:all
 ```
 
+> **Tip:** `bazel run //:tidy` regenerates `BUILD` files (gazelle) and formats
+> everything in one step. The **Tidy Check** CI job fails a PR when `BUILD` files
+> are stale — see [Formatting and Linting](./formatting-linting.md#keeping-build-files-tidy).
+
 ### Example: Adding a TypeScript Module
 
 ```bash

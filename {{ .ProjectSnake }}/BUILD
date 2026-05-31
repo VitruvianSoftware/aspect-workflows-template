@@ -99,6 +99,28 @@ gazelle(
     }
 )
 
+load("@rules_multirun//:defs.bzl", "multirun")
+
+# One-command BUILD/source hygiene. Regenerates BUILD files (gazelle), refreshes
+# the Python deps manifest (when Python is enabled), then formats everything
+# (//tools/format bundles buildifier + every per-language formatter; it ships
+# only when the `lint` feature is on). Sequential so the formatter sees gazelle's
+# freshly written BUILD files. Run `bazel run //:tidy`; the Tidy Check CI job
+# fails a PR when running this would change anything.
+multirun(
+    name = "tidy",
+    commands = [
+        ":gazelle",
+{{- if .Computed.python }}
+        ":gazelle_python_manifest.update",
+{{- end }}
+{{- if .Scaffold.lint }}
+        "//tools/format",
+{{- end }}
+    ],
+    jobs = 1,  # sequential: gazelle writes BUILD files, then format formats them
+)
+
 {{ if .Computed.python }}
 load("@pip//:requirements.bzl", "all_whl_requirements")
 load("@rules_python_gazelle_plugin//manifest:defs.bzl", "gazelle_python_manifest")

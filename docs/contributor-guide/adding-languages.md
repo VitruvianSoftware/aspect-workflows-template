@@ -583,6 +583,7 @@ Before submitting a PR for new language support:
 - [ ] Added feature filters
 - [ ] Updated README template
 - [ ] Created user story in `user_stories/`
+- [ ] Added a `docs/dependency-versioning/<lang>.md` page + a matching `features:` glob in `scaffold.yaml` (gated on `.Computed.<lang>`)
 - [ ] Tested in isolation (`./test.sh language`)
 - [ ] Tested with language combinations
 - [ ] Tested formatting works

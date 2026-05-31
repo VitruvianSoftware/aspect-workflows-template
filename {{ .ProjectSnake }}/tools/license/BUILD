@@ -57,6 +57,9 @@ _IGNORE_GLOBS = [
     "catalog-info.yaml",
     # Devcontainer files
     ".devcontainer/**",
+    # Pulumi per-stack config (tool-managed; matches Pulumi.dev.yaml but NOT the
+    # headered project Pulumi.yaml).
+    "**/Pulumi.*.yaml",
 ]
 
 # SPDX ID → addlicense -l value mapping (resolved at scaffold generation time).

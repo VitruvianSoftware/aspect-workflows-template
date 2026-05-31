@@ -1,0 +1,60 @@
+name: Infra Preview
+
+# PR preview for the CENTRAL Pulumi stack at `infrastructure/pulumi/`
+# (project `aspect-workflows-template-infra`, stack `dev`) — the standalone Go
+# program that manages this org's GitHub repos and the starter deploy keys.
+#
+# PREVIEW-ONLY, BY DESIGN: this workflow never runs `pulumi up`. A bad apply
+# here could rotate all 26 delivery deploy keys, so applies stay a gated, manual
+# `pulumi up` (run locally by an owner) — CI only shows the proposed diff.
+#
+# Unlike the scaffolded projects, the template root is NOT a Bazel workspace, so
+# the stack is driven by the raw `pulumi` CLI (installed by `pulumi/actions`),
+# not `bazel run`.
+#
+# Credentials come from the shared org GitHub App (created once per org via
+# `bazel run //tools/pulumi:create-app` in a generated project). The App MUST be
+# installed org-wide so the Pulumi GitHub provider can read every managed repo;
+# its app id lives in the PULUMI_APP_ID variable and its private key in the
+# APP_PRIVATE_KEY secret, plus PULUMI_ACCESS_TOKEN for the Pulumi backend. These
+# are org-level, so they are available to this repo's workflows too.
+on:
+    pull_request:
+        paths: ["infrastructure/pulumi/**"]
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    preview:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+
+            # Pulumi compiles and runs the Go program itself; install the matching
+            # Go toolchain so it can build the central stack.
+            - uses: actions/setup-go@v5
+              with:
+                  go-version-file: infrastructure/pulumi/go.mod
+
+            - name: Mint a GitHub App token for the Pulumi GitHub provider
+              id: app-token
+              uses: actions/create-github-app-token@v2
+              with:
+                  app-id: ${{ vars.PULUMI_APP_ID }}
+                  private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+            # `pulumi/actions` installs the Pulumi CLI, runs the preview, and posts
+            # the diff back to the PR as a single updating comment.
+            - name: Pulumi preview (central infra stack)
+              uses: pulumi/actions@8e5e406f4007fca908480587cb9893c07090f58d # v7.0.0
+              with:
+                  command: preview
+                  stack-name: dev
+                  work-dir: infrastructure/pulumi
+                  comment-on-pr: true
+              env:
+                  GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+                  GITHUB_OWNER: ${{ github.repository_owner }}
+                  PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

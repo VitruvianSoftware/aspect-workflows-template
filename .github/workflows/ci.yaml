@@ -57,7 +57,8 @@ jobs:
         os: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/platform-v2.0')) && fromJSON('["ubuntu-latest","macos-latest"]') || fromJSON('["ubuntu-latest"]') }}
         exclude:
           # rules_swift's xcode_swift_toolchain can't parse the macos-latest
-          # Xcode 16.4 SDK with our pinned rules_swift main commit. Swift is
+          # Xcode 16.4 SDK (seen on the old rules_swift main pin; not yet
+          # re-checked on 4.1.1). Swift is
           # verified on Linux (hermetic toolchain), and the delivered swift
           # starter's own CI runs Linux-only — so skip swift on macOS here.
           - preset: swift

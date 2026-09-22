@@ -89,24 +89,16 @@ bazel_dep(name = "aspect_rules_lint_rust", version = "0.0.2")
 # Support for Swift, see https://github.com/bazelbuild/rules_swift. Generic
 # cross-platform Swift only (no rules_apple / .app bundling). HERMETIC on Linux:
 # the rules_swift `swift` bzlmod extension (below) downloads a standalone
-# toolchain from swift.org, so CI and Linux developers need NO host `swift`. That
-# extension is only on rules_swift `main` (not the 3.6.1 release), so it is pinned
-# via git_override until it ships in a release -- then drop the override and bump
-# the version. (`CC=clang` is still required: the Swift toolchain links via the
-# configured CC toolchain, which rules_swift requires to be clang.)
+# toolchain from swift.org, so CI and Linux developers need NO host `swift` (the
+# extension first shipped in rules_swift 4.0.1). (`CC=clang` is still required:
+# the Swift toolchain links via the configured CC toolchain, which rules_swift
+# requires to be clang.)
 {% if not oci %}
 # //swift's config_settings reference @platforms//{os,cpu}; oci presets already
 # declare this, so only add it when oci is off (avoids a duplicate bazel_dep).
 bazel_dep(name = "platforms", version = "1.1.0")
 {% endif %}
-bazel_dep(name = "rules_swift", version = "3.6.1", repo_name = "build_bazel_rules_swift")
-git_override(
-    module_name = "rules_swift",
-    # main @ 2026-05-22; first ref carrying the hermetic `swift` toolchain
-    # extension (PR #1630). Swap for a stable release once one ships with it.
-    commit = "f9f6fc9e308a18bfb2ea4797fea6c52fe134b980",
-    remote = "https://github.com/bazelbuild/rules_swift.git",
-)
+bazel_dep(name = "rules_swift", version = "4.1.1", repo_name = "build_bazel_rules_swift")
 {% endif %}
 {% if ruby %}
 bazel_dep(name = "rules_ruby", version = "0.27.0")

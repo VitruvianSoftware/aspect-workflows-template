@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.0.0](https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v2.3.0...v3.0.0) (2026-09-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* template now renders via 'aspect render-preset', not 'scaffold new'. Our delivery/CI is rewired in a later phase.
+
+### Features
+
+* **app:** application composition core (initializer P0) ([#44](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/44)) ([b6b6ba5](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/b6b6ba5b43f6da9f44717b95f8dca418c5adde39))
+* **app:** embed the initializer in every starter (P0.5, ADR-026) ([#46](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/46)) ([819d9d4](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/819d9d49b7a98952699c8de690f0916e042d0469))
+* migrate template engine to upstream native AXL renderer ([#38](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/38)) ([68cd928](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/68cd928ea95dd50ba716977b017eb46e937ab8db))
+
+
+### Bug Fixes
+
+* **app:** honour the host's gazelle build-file name and import prefix (P1.1) ([#47](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/47)) ([33b03ab](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/33b03ab25deac0110963ac6383d96ec5e847efe0))
+* **catalog:** resolve every dangling owner and system reference this repo emits ([#42](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/42)) ([fcb3f87](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/fcb3f87a1a7da8050356facb767b5b898625ac9e))
+* **rust:** mirror rules_rs's zlib .deb via Launchpad (Ubuntu archive 404) ([#49](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/49)) ([97a20f7](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/97a20f738d821ab14924bca1a155cb4a1bb1bf35))
+* **setup_repos:** read presets from deliver.yaml, run on macOS, stop stacking keys ([#43](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/43)) ([540c614](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/540c6144584eec837c9b4ad1f0177ba9d8136019))
+* **template:** emit distinct Template names for ruby and scala ([#41](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/41)) ([605bfe4](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/605bfe43d82ab05520a5d55c010764de7a2c2290))
+* **test:** quote $(pwd) to prevent word splitting (SC2046) ([#50](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/50)) ([50f18ab](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/50f18ab7a84280d5ca5c27a0cbb8bd9f490b6b49))
+
 ## [2.3.0](https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v2.2.1...v2.3.0) (2026-06-14)
 
 

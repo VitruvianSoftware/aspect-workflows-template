@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v3.0.1...v3.0.2) (2026-10-11)
+
+
+### Bug Fixes
+
+* **ci:** cap the delivery job and skip the sample push when ttl.sh is down ([#54](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/54)) ([08c5e2a](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/08c5e2afac03a95e1eed323b8f898c0bdf58f98f))
+
 ## [3.0.1](https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v3.0.0...v3.0.1) (2026-10-11)
 
 

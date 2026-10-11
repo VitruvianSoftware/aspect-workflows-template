@@ -63,22 +63,12 @@ jobs:
         run: |
           aspect render-preset --preset='${{ matrix.preset }}' --out="$RUNNER_TEMP/out" --name=my_project --license=Apache-2.0
           cd "$RUNNER_TEMP/out"
-          if [ -x ./tools/repin ]; then ./tools/repin; fi
-          bazel mod deps --lockfile_mode=update || true
-          git init -q
+          # Shared with ci.yaml so what CI checks is exactly what is shipped:
+          # repin, buildifier, gazelle, licence headers, format, ruby layout fix.
+          NORMALIZE_GIT_NAME="Git, the Delivery bot" NORMALIZE_GIT_EMAIL="git@nocentre.net" \
+            "$GITHUB_WORKSPACE/.github/scripts/normalize-rendered.sh" '${{ matrix.preset }}'
           git config user.email "git@nocentre.net"
           git config user.name "Git, the Delivery bot"
-          git add -A
-          git commit -q -m "template"
-          # Normalize exactly as CI does (buildifier + gazelle + format).
-          bazel run --run_in_cwd @buildifier_prebuilt//buildifier -- -r . || true
-          aspect gazelle --github-status-comments:enabled=false --github-status-checks:enabled=false --check-only=false || true
-          case "${{ matrix.preset }}" in
-            minimal|scala|ruby|backstage-minimal|backstage-scala|backstage-ruby) ;;
-            *) aspect format --github-status-comments:enabled=false --github-status-checks:enabled=false --scope=all || true ;;
-          esac
-          # Apply Apache-2.0 headers (we rendered with --license=Apache-2.0).
-          bazel run //tools/license:add || true
           # Ship the platform CHANGELOG (maintained by release-please) so downstream
           # devs can track upstream changes.
           if [ -f "$GITHUB_WORKSPACE/CHANGELOG.md" ]; then cp "$GITHUB_WORKSPACE/CHANGELOG.md" CHANGELOG.md; fi

@@ -83,6 +83,9 @@ jobs:
   delivery:
     needs: [test]
     runs-on: ubuntu-latest
+    # A stuck push (e.g. the demo registry stalling) must not hold a runner for
+    # the 6-hour default.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
         with:
@@ -90,7 +93,26 @@ jobs:
       - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
         with:
           aspect-api-token: ${{ '{{' }} secrets.ASPECT_API_TOKEN {{ '}}' }}
+      - name: Check the sample registry is reachable
+        id: registry
+        run: |
+          # ttl.sh is a free anonymous demo registry. When the sample still pushes
+          # there and it cannot accept an upload (connect failure, timeout, 5xx),
+          # skip delivery with a visible warning rather than hang or fail CI on
+          # an outage that is not a defect in this repo. Any other response
+          # proceeds, so a real push failure still fails the job.
+          if git grep -q 'repository = "ttl.sh/' -- '*.bzl' 'BUILD' 'BUILD.bazel'; then
+            code="$(curl -s -o /dev/null -m 20 -w '%{http_code}' -X POST "https://ttl.sh/v2/ci-probe-$RANDOM$RANDOM/blobs/uploads/" || true)"
+            case "$code" in
+              000 | 5??)
+                echo "reachable=false" >> "$GITHUB_OUTPUT"
+                echo "::warning title=ttl.sh unreachable::ttl.sh did not accept an upload (HTTP $code); skipping the sample image push. This is an outage of the demo registry, not a failure of this repo."
+                ;;
+            esac
+          fi
       # Selective delivery (change detection) requires the Aspect Workflows
       # backend; on plain ephemeral runners deliver unconditionally.
-      - run: aspect delivery --task:name delivery --track-state=false --mode=always
+      - name: Deliver
+        if: steps.registry.outputs.reachable != 'false'
+        run: aspect delivery --task:name delivery --track-state=false --mode=always
 {% endif %}

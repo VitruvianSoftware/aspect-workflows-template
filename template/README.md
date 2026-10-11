@@ -175,6 +175,9 @@ pushed by `aspect delivery`. The delivery query and release flags are configured
 anonymous, ephemeral `ttl.sh`).
 
 - Run `aspect delivery` to build + push deliverables.
+- The CI `delivery` job is capped at 20 minutes, and it skips the sample push with a warning
+  annotation if `ttl.sh` itself is down (connect failure, timeout or 5xx). Once you point
+  `repository` at your own registry that check no longer applies and a failed push fails the job.
 {% endif %}
 
 {% if rust %}

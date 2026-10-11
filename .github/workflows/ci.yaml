@@ -183,9 +183,32 @@ jobs:
 
       # delivery runs for presets whose stamped CI has a delivery job (oci/stamp).
       # --track-state=false --mode=always mirrors the stamped delivery job.
-      - name: Delivery
+      - name: Check the sample registry is reachable
+        id: registry
         if: ${{ contains(fromJSON('["go","kitchen-sink"]'), matrix.preset) }}
         working-directory: ${{ env.WS }}
+        run: |
+          # ttl.sh is a free anonymous demo registry. When the sample still pushes
+          # there and it cannot accept an upload (connect failure, timeout, 5xx),
+          # skip delivery with a visible warning rather than hang or fail CI on
+          # an outage that is not a defect in this repo. Any other response
+          # proceeds, so a real push failure still fails the job.
+          if git grep -q 'repository = "ttl.sh/' -- '*.bzl' 'BUILD' 'BUILD.bazel'; then
+            code="$(curl -s -o /dev/null -m 20 -w '%{http_code}' -X POST "https://ttl.sh/v2/ci-probe-$RANDOM$RANDOM/blobs/uploads/" || true)"
+            case "$code" in
+              000 | 5??)
+                echo "reachable=false" >> "$GITHUB_OUTPUT"
+                echo "::warning title=ttl.sh unreachable::ttl.sh did not accept an upload (HTTP $code); skipping the sample image push. This is an outage of the demo registry, not a failure of this repo."
+                ;;
+            esac
+          fi
+
+      - name: Delivery
+        if: ${{ contains(fromJSON('["go","kitchen-sink"]'), matrix.preset) && steps.registry.outputs.reachable != 'false' }}
+        working-directory: ${{ env.WS }}
+        # The stamped starter job caps this at 20 minutes too; a healthy run takes
+        # seconds, so a hang is always an outage, never slow work.
+        timeout-minutes: 20
         run: aspect delivery --task:name delivery-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --track-state=false --mode=always
 
       # Execute the preset's user story — an executable-Markdown tutorial that

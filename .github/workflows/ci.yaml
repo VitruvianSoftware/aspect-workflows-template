@@ -87,27 +87,14 @@ jobs:
       # byte-for-byte what a published starter ships. The check steps then run
       # the SAME tasks the stamped CI (template/.github/workflows/ci.yaml) runs
       # downstream — so a green run here means the starter repos are green too.
-      - name: Render + post-scaffold (repin, normalize)
+      - name: Render + post-scaffold (repin, normalize, license)
         run: |
-          aspect render-preset --preset='${{ matrix.preset }}' --out="$RUNNER_TEMP/out" --name=my_project
+          aspect render-preset --preset='${{ matrix.preset }}' --out="$RUNNER_TEMP/out" --name=my_project --license=Apache-2.0
           echo "WS=$RUNNER_TEMP/out" >> "$GITHUB_ENV"
           cd "$RUNNER_TEMP/out"
-          # repin — the template ships placeholder lockfiles; regenerate them.
-          if [ -x ./tools/repin ]; then ./tools/repin; fi
-          bazel mod deps --lockfile_mode=update || true
-          # git init FIRST — gazelle/format need a git tree to enumerate + apply.
-          git init -q
-          git add -A
-          git -c user.email=ci@aspect.build -c user.name=CI commit -q -m "rendered ${{ matrix.preset }}"
-          # Normalize (buildifier + gazelle + format), mirroring the publish job.
-          bazel run --run_in_cwd @buildifier_prebuilt//buildifier -- -r . || true
-          aspect gazelle --task:name gazelle-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --check-only=false || true
-          case "${{ matrix.preset }}" in
-            minimal|scala|ruby) ;;
-            *) aspect format --task:name format-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --scope=all || true ;;
-          esac
-          git add -A
-          git -c user.email=ci@aspect.build -c user.name=CI commit -q --amend --no-edit || true
+          # The very script deliver.yaml runs, including the licence headers, so a
+          # defect the headers introduce fails HERE instead of only in a starter.
+          "$GITHUB_WORKSPACE/.github/scripts/normalize-rendered.sh" '${{ matrix.preset }}' '${{ matrix.preset }}-${{ matrix.os }}'
 
       # Assert the multitool-pinned aspect-launcher matches the version in
       # tools.lock.json. The launcher prints `aspect launcher <version>` for

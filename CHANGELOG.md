@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v3.0.0...v3.0.1) (2026-10-11)
+
+
+### Bug Fixes
+
+* **deliver:** stop the licence-header step breaking Ruby/shell starters; make CI render what ships ([#52](https://github.com/VitruvianSoftware/aspect-workflows-template/issues/52)) ([2c496ad](https://github.com/VitruvianSoftware/aspect-workflows-template/commit/2c496addb9ad6996c421312aa5841120d31fd7f1))
+
 ## [3.0.0](https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v2.3.0...v3.0.0) (2026-10-11)
 
 

@@ -49,6 +49,19 @@ jobs:
           - backstage-swift
           - backstage-scala
           - backstage-shell
+    # The contended resource is each starter repo's `main`, which this job
+    # force-pushes. Serialise deliveries per starter so two overlapping pushes
+    # (a fix merge followed closely by its release PR) can never race, and the
+    # older render can never land last. cancel-in-progress is false on purpose:
+    # a push that is already running always finishes, so a starter is never left
+    # half-delivered. While one is running, only the NEWEST waiting job is kept
+    # (an older waiting one is cancelled), which is right because every render
+    # is a full snapshot that supersedes the previous one. The group spans
+    # branches deliberately: main, push_starters and platform-v2.0 all push to
+    # the same starter repos.
+    concurrency:
+      group: deliver-${{ matrix.preset }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

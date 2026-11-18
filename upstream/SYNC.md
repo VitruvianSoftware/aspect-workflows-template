@@ -125,6 +125,22 @@ repositories.
 
 ## What earlier syncs learned
 
+- **release-please reads merged-in upstream commits as ours.** A dry run of
+  the reconnect showed upstream's `fix(template): pin Bazel 9.3.1` and its
+  cosmo.zip fix in our next changelog, linked to the wrong `#912` in our repo,
+  though we pin 9.3.2. Every sync PR body therefore ends with a commit
+  override that replaces all of the PR's commits with our own summary:
+
+  ```
+  BEGIN_COMMIT_OVERRIDE
+  fix(sync): merge upstream <old>..<new> (<one-line summary>)
+  END_COMMIT_OVERRIDE
+  ```
+
+  Use `chore(sync): ...` inside it when nothing reaches the starters. In step 8,
+  check the release PR's changelog shows only that line. If upstream commits
+  still appear, edit the merged sync PR's body and re-run the `release-please`
+  workflow; never merge a release PR with upstream's commits in it.
 - **Delivery force-pushes all 26 starters on every push to `platform-v2.0`**,
   even a docs-only change. It is serialised per preset (`concurrency`, #56), so
   two close merges are safe, but each one costs about 40 minutes of runners.

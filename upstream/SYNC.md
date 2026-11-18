@@ -2,7 +2,8 @@
 
 The steps an agent follows to bring everything
 [aspect-build/aspect-workflows-template](https://github.com/aspect-build/aspect-workflows-template)
-published since the last sync into this fork and land it on `platform-v2.0`. A
+published since the last sync into this fork by merging it, and land it on
+`platform-v2.0`. A
 scheduled Claude Code routine runs it every Monday morning, Pacific time, in a
 fresh cloud session that reads this file from `platform-v2.0`. Anyone can run it
 by hand the same way.
@@ -14,42 +15,30 @@ change this file in a pull request; the next run follows the version on
 
 ## Goal
 
-Every upstream commit has a row in [`ledger.tsv`](ledger.tsv), none is
-`pending`, and every port is merged to `platform-v2.0` with its checks green and
-delivered to the starter repositories.
+`upstream/main` is an ancestor of `platform-v2.0`: everything upstream
+published is either merged here or deliberately reverted in the merge, and the
+merge is on `platform-v2.0` with its checks green and delivered to the starter
+repositories.
 
 ## How this fork relates to upstream
 
-- **No shared history.** On 2026-06-26 (#38) we copied upstream's new template
-  engine (`render.axl`, `template/`, `template-config.json`) in rather than
-  merging it, so `git merge-base` with upstream is a 2026-05-23 commit and git
-  reports dozens of commits "behind" that are already here. Never rebase or
-  merge `upstream/main`. The ledger is the record of what has been taken.
+- **Merged, not rebased.** This fork tracks upstream by merging `upstream/main`
+  into `platform-v2.0` with a real merge commit. Git applies whatever merges
+  cleanly; you resolve only the conflicts. Never rebase `platform-v2.0`: it is
+  the default branch, the release tags and the 26 starters' deliveries hang off
+  its history, and a rebase means force-pushing all of it.
+- **History.** From 2026-06-26 (#38, the AXL engine migration copied in rather
+  than merged) until the reconnect on 2026-11-17, the two histories were
+  disconnected. The reconnect merge (`git merge -s ours`) recorded upstream as
+  merged after every upstream commit up to `f595cf0` had been ported or judged
+  already present. Its commit message lists each decision. From there on,
+  `git merge upstream/main` only offers what is new.
 - **`platform-v2.0` is the base branch** (it is the default branch). Ignore this
   fork's `main`.
-- **Paths mostly line up.** Upstream's `template/` and ours have the same layout,
-  so `git show <sha> -- template/ | git apply` often works. The root
-  `.github/workflows/` does not line up: ours is rewired around
-  `.github/scripts/normalize-rendered.sh`, so upstream CI changes are ported by
-  hand or skipped.
-
-## Ledger
-
-`ledger.tsv` has one row per upstream commit after the 2026-05-23 merge-base,
-oldest first. Columns: `upstream_sha`, `date`, `status`, `ref`, `note`,
-`subject`. Status is one of:
-
-| status | meaning | ref |
-|---|---|---|
-| `pending` | not yet decided | `-` |
-| `ported` | change made in this fork | the pull request, `#NN` |
-| `present` | already here (verified, say how in the note) | the PR that brought it |
-| `superseded` | a later change makes it moot, e.g. a newer version pin | that PR |
-| `skipped` | deliberately not taken; the note says why | `-` or a related PR |
-
-`present` needs evidence: the patch reverse-applies
-(`git show <sha> | git apply --check -R`), or you read both files and say so in
-the note. Never mark a row `present` on a hunch.
+- **Paths mostly line up.** Upstream's `template/` and ours share a layout, so
+  most `template/` changes merge on their own. The root `.github/workflows/`
+  does not: ours is rewired around `.github/scripts/normalize-rendered.sh` and
+  `deliver.yaml`.
 
 ## Where the work happens
 
@@ -61,68 +50,78 @@ the note. Never mark a row `present` on a hunch.
 - Plain `git` and `gh` work in this repository. Always pass
   `--repo VitruvianSoftware/aspect-workflows-template` to `gh`, because the
   `upstream` remote makes it guess wrong.
+- Fetch **full** history (`git fetch --unshallow origin` if the clone is
+  shallow). A shallow clone cannot find the merge base and makes git think
+  every upstream commit is new.
 
 ## Steps
 
-1. Fetch: `git fetch origin platform-v2.0`, and add and fetch upstream
+1. Fetch: `git fetch origin platform-v2.0`, then add and fetch upstream
    (`git remote add upstream https://github.com/aspect-build/aspect-workflows-template.git`
    if missing, then `git fetch upstream main`). Start your branch from
    `origin/platform-v2.0`. If an open pull request already carries an upstream
-   sync (title starts `chore(sync): port upstream`), drive that one to merged
-   first.
-2. Add a `pending` row for every commit in `git log --reverse upstream/main`
-   that is newer than the last ledger row and not in it. If nothing is pending,
-   stop and report "caught up at <upstream sha>".
-3. Decide each pending row, oldest first:
-   - **Aspect CLI or `setup-aspect` bumps** collapse into one change: set
-     `template/.aspect/version.axl` to upstream's latest CLI, and every
-     `aspect-build/setup-aspect@<sha> # vX` use (root `.github/workflows/*` and
-     `template/.github/workflows/ci.yaml`) to upstream's latest. Confirm the
-     tag resolves to that SHA with
-     `gh api repos/aspect-build/setup-aspect/git/ref/tags/<tag>`. Earlier bump
-     rows become `superseded` by this PR. Leave `aspect-launcher` in
-     `template/tools/tools.lock.json` alone unless upstream moved it.
-   - **Bazel version** (`template/.bazelversion`): take it only if it is a
-     stable release (no `rc`), and read its release notes for removals and
-     flag flips. Say in the PR what you found. vitruvian-core is a separate
-     repository and not this routine's job; if the bump looks relevant there,
-     say so in the report.
-   - **`template/` changes**: apply the upstream diff, then resolve it against
-     our jinja (`{% if ... %}` blocks). Keep our additions (licence tooling,
-     Copybara, Pulumi, RBE, backstage presets, the app initializer).
+   sync (title starts `chore(sync): merge upstream` or `fix(sync): merge upstream`),
+   drive that one to merged first.
+2. List what is new: `git log --reverse --format='%h %ad %s' --date=short
+   origin/platform-v2.0..upstream/main`. If it is empty, stop and report
+   "caught up at <upstream/main sha>". If it lists commits from June 2026 or
+   earlier, the history is not connected (shallow clone, or the reconnect was
+   undone): stop and report, do not merge.
+3. Merge: `git merge --no-ff --no-commit upstream/main`. Then review every
+   change, conflicted or not, with `git diff --cached origin/platform-v2.0`.
+   A clean merge can still bring in something we do not want:
+   - **Aspect CLI or `setup-aspect` bumps**: take upstream's
+     `template/.aspect/version.axl`. For each `aspect-build/setup-aspect@<sha> # vX`
+     use (root `.github/workflows/*` and `template/.github/workflows/ci.yaml`),
+     move ours to upstream's pin, and confirm the tag resolves to that SHA with
+     `gh api repos/aspect-build/setup-aspect/git/ref/tags/<tag>`. Leave
+     `aspect-launcher` in `template/tools/tools.lock.json` alone unless
+     upstream moved it.
+   - **Bazel version** (`template/.bazelversion`): take the newest **stable**
+     release in the same major (no `rc`); it may be newer than upstream's pin.
+     Read its release notes for removals and flag flips and say what you found
+     in the PR. vitruvian-core is a separate repository and not this routine's
+     job; if the bump looks relevant there, say so in the report.
+   - **`template/` changes**: keep upstream's change and our jinja
+     (`{% if ... %}`) and additions (licence tooling, Copybara, Pulumi, RBE,
+     backstage presets, the app initializer).
    - **Never take**: upstream's release, tag or publish workflows (we use
-     release-please and `deliver.yaml`), their branding or org names, or
-     anything that reintroduces the hay-kot/scaffold engine.
-   - When you are not sure a change is wanted, mark it `skipped` with the
-     reason and list it for James. Do not guess.
-4. Commit in conventional format. Use `fix:` or `feat:` only when the change
-   reaches the starters (it triggers a release); use `ci:` or `chore:` for
-   changes to this repository's own workflows or docs. Each commit body names
-   the upstream SHAs it covers.
-5. Open one pull request to `platform-v2.0` titled
-   `chore(sync): port upstream <first sha>..<last sha>` (use `fix(sync):` if
-   anything reaches the starters). Body: a table of each upstream commit, its
-   status and what changed here, then the verification. Update the ledger rows
-   with the PR number in the same PR.
+     release-please and `deliver.yaml`; delete any such file the merge adds),
+     their branding or org names, or anything that reintroduces the
+     hay-kot/scaffold engine. Resolve those hunks to ours.
+   - When you are not sure a change is wanted, keep ours, and list it for James
+     with the upstream SHA. Do not guess.
+4. Commit the merge with `git commit` (keep it a merge commit). Subject:
+   `fix(sync): merge upstream <old sha>..<new sha>` when anything reaches the
+   starters (it triggers a release), else `chore(sync): ...`. The body lists
+   each upstream commit and what happened to it: merged, adapted (how), or
+   resolved to ours (why).
+5. Open one pull request to `platform-v2.0` with that title. Body: the same
+   table, then the verification. Put a release-please commit override in the
+   body (see "What earlier syncs learned").
 6. Wait for every check. The 18 Linux preset legs render each preset the way
    delivery does and run build, test, lint, format and gazelle on it; they are
    the authority. macOS legs only run after merge. Read a failing job's log and
-   fix the cause; never skip or disable a check.
-7. Merge it yourself with `gh pr merge <n> --squash` once **every** check is
-   green. The repository has no required checks and no auto-merge, so nothing
-   else stops a red merge: you are the gate. If a port cannot be made green
-   after a few honest attempts, leave the PR open with one comment naming the
-   blocker, and report that.
+   fix the cause with a further commit on the branch; never skip or disable a
+   check.
+7. Merge it yourself with **`gh pr merge <n> --merge`** once **every** check is
+   green. Never `--squash` or `--rebase` a sync: either one drops upstream from
+   the history and the next sync is back to hundreds of commits "behind". The
+   repository has no required checks and no auto-merge, so you are the gate. If
+   a sync cannot be made green after a few honest attempts, leave the PR open
+   with one comment naming the blocker, and report that.
 8. After merging, verify on the merge commit (pass the **full** SHA to
    `gh run list --commit`; a short one matches nothing):
+   - `git merge-base --is-ancestor upstream/main origin/platform-v2.0` succeeds;
    - `CI` is green, including the 17 macOS legs;
    - `Deliver starters` finishes 26 of 26;
    - every starter's `CI` on its new `main` head is green
      (`gh run list --repo VitruvianSoftware/<preset> --commit <sha> --workflow CI`
      for each preset in `deliver.yaml`).
-   If release-please opens a release PR, **do not merge it**. Report it.
-9. Report: the PR merged, the upstream SHA the fork is caught up with, every row
-   still `pending` or newly `skipped` and why, and anything James must decide.
+   If release-please opens or updates a release PR, check its changelog lists
+   only our own change, then report it. **Do not merge it.**
+9. Report: the PR merged, the upstream SHA the fork is caught up with, every
+   upstream change resolved to ours and why, and anything James must decide.
 
 ## What earlier syncs learned
 

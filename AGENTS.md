@@ -38,5 +38,10 @@ not a buildable app: it *generates* hermetic Bazel monorepos.
 
 ## Conventions
 - **Conventional commits** (`feat:`, `fix:`, `chore:`, `docs:` …).
+- **How to merge a PR.** Upstream syncs (title starts `fix(sync): merge upstream`
+  or `chore(sync): merge upstream`) use **Create a merge commit**
+  (`gh pr merge --merge`). Squash or rebase would drop upstream's commits from our
+  history, and the next sync would see all of them as new again. Every other PR
+  carries only our own commits: **Squash and merge** as usual.
 - Generated repos themselves ship an `AGENTS.md` (`{{ .ProjectSnake }}/AGENTS.md`) — keep the
   two in mind: this file is for working *on the template*; that one is for the *generated repo*.

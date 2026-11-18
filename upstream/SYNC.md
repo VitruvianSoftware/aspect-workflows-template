@@ -96,8 +96,9 @@ repositories.
    starters (it triggers a release), else `chore(sync): ...`. The body lists
    each upstream commit and what happened to it: merged, adapted (how), or
    resolved to ours (why).
-5. Open one pull request to `platform-v2.0` with that title. Body: the same
-   table, then the verification. Put a release-please commit override in the
+5. Open one pull request to `platform-v2.0` with that title. Body: first line
+   `> **Merge with "Create a merge commit", not squash or rebase.**` (a human
+   may merge it), then the same table, then the verification. Put a release-please commit override in the
    body (see "What earlier syncs learned").
 6. Wait for every check. The 18 Linux preset legs render each preset the way
    delivery does and run build, test, lint, format and gazelle on it; they are

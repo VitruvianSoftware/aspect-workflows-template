@@ -29,7 +29,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
@@ -38,7 +38,7 @@ jobs:
       - run: aspect test --task:name test -- //...
 
   gazelle:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
@@ -47,7 +47,7 @@ jobs:
       - run: aspect gazelle --task:name gazelle
 
   buildifier:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
@@ -57,7 +57,7 @@ jobs:
 {% if go or python or javascript or cpp or kotlin or rust or shell or java %}
 
   format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
@@ -70,7 +70,7 @@ jobs:
 {% if lint and (shell or javascript or python or cpp or kotlin or java or ruby or rust) %}
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: aspect-build/setup-aspect@ebca96eb49ef58c00d4226de8bd3a0813507dd87 # v2026.38.3
@@ -82,7 +82,7 @@ jobs:
 
   delivery:
     needs: [test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # A stuck push (e.g. the demo registry stalling) must not hold a runner for
     # the 6-hour default.
     timeout-minutes: 20

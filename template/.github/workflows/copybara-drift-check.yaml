@@ -45,7 +45,7 @@ concurrency:
 
 jobs:
     drift-check:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
         env:
             # TODO: set to your GitHub organisation (e.g. "my-org").
             GITHUB_ORG: YOUR_GITHUB_ORG

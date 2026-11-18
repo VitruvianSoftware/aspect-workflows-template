@@ -125,6 +125,13 @@ repositories.
 
 ## What earlier syncs learned
 
+- **Runners are pinned to `ubuntu-24.04`, never `ubuntu-latest`.** When
+  `ubuntu-latest` became Ubuntu 26.04 (from 2026-10-19), it dropped
+  `libxml2.so.2`, which the hermetic LLVM 19.1.7 `ld.lld` and the Swift
+  toolchain both load, so every preset that links native code (cpp, rust,
+  swift, kitchen-sink) failed. If an upstream merge brings `ubuntu-latest`
+  back, resolve it to our pin. Move the pin deliberately, after the toolchains
+  run on the new image.
 - **release-please reads merged-in upstream commits as ours.** A dry run of
   the reconnect showed upstream's `fix(template): pin Bazel 9.3.1` and its
   cosmo.zip fix in our next changelog, linked to the wrong `#912` in our repo,

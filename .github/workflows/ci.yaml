@@ -54,7 +54,7 @@ jobs:
         # on main pushes (where Apple-Silicon-only breakage like the
         # distroless linux/arm64/v8 manifest bug would otherwise slip through);
         # PRs stay Linux-only.
-        os: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/platform-v2.0')) && fromJSON('["ubuntu-latest","macos-latest"]') || fromJSON('["ubuntu-latest"]') }}
+        os: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/platform-v2.0')) && fromJSON('["ubuntu-24.04","macos-latest"]') || fromJSON('["ubuntu-24.04"]') }}
         exclude:
           # rules_swift's xcode_swift_toolchain can't parse the macos-latest
           # Xcode 16.4 SDK (seen on the old rules_swift main pin; not yet
@@ -72,7 +72,7 @@ jobs:
       # cpp/LLVM toolchain to provide clang, so export CC=clang before the first
       # bazel call. (kitchen-sink's cpp already registers a clang LLVM toolchain.)
       - name: Use clang for Swift (Linux)
-        if: ${{ matrix.preset == 'swift' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.preset == 'swift' && matrix.os == 'ubuntu-24.04' }}
         run: |
           echo "CC=clang" >> "$GITHUB_ENV"
           echo "CXX=clang++" >> "$GITHUB_ENV"
@@ -239,7 +239,7 @@ jobs:
   # independently of the preset matrix so a broken contract does not wait on 18
   # preset builds.
   app-contract:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
 
@@ -704,7 +704,7 @@ jobs:
   # its own so branch protection keeps a single check to name.
   conclusion:
     needs: [preset, app-contract]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: always()
     steps:
       - name: Report

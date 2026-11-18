@@ -24,7 +24,7 @@ permissions:
 jobs:
     preview:
         if: ${{ vars.REPO_CONFIG_PREVIEW_ENABLED == 'true' }}
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
         steps:
             - uses: actions/checkout@v6
 

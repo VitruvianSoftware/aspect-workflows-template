@@ -94,7 +94,7 @@ jobs:
           cd "$RUNNER_TEMP/out"
           # The very script deliver.yaml runs, including the licence headers, so a
           # defect the headers introduce fails HERE instead of only in a starter.
-          "$GITHUB_WORKSPACE/.github/scripts/normalize-rendered.sh" '${{ matrix.preset }}' '${{ matrix.preset }}-${{ matrix.os }}'
+          "$GITHUB_WORKSPACE/.github/scripts/normalize-rendered.sh" '${{ matrix.preset }}' '${{ matrix.preset }}-${{ runner.os }}'
 
       # Assert the multitool-pinned aspect-launcher matches the version in
       # tools.lock.json. The launcher prints `aspect launcher <version>` for
@@ -141,7 +141,7 @@ jobs:
       # No separate build step: `aspect test` builds everything it needs.
       - name: Test
         working-directory: ${{ env.WS }}
-        run: aspect test --task:name test-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false -- //...
+        run: aspect test --task:name test-${{ matrix.preset }}-${{ runner.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false -- //...
 
       # The steps below run the SAME tasks the generated project's CI
       # (template/.github/workflows/ci.yaml) runs, with the same per-preset
@@ -152,12 +152,12 @@ jobs:
       # buildifier always runs (Starlark; only needs buildifier_prebuilt).
       - name: Buildifier
         working-directory: ${{ env.WS }}
-        run: aspect buildifier --task:name buildifier-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --scope=all
+        run: aspect buildifier --task:name buildifier-${{ matrix.preset }}-${{ runner.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --scope=all
 
       # gazelle runs for every preset (the stamped CI always has a gazelle job).
       - name: Gazelle (no changes expected)
         working-directory: ${{ env.WS }}
-        run: aspect gazelle --task:name gazelle-check-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false
+        run: aspect gazelle --task:name gazelle-check-${{ matrix.preset }}-${{ runner.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false
 
       # Lint runs only for presets with a wired rules_lint aspect (matches the
       # stamped CI's lint-job gating and .aspect/config.axl's aspects list).
@@ -172,14 +172,14 @@ jobs:
       - name: Lint
         if: ${{ !contains(fromJSON('["minimal","go","scala","swift","copybara-go","copybara-oneway","backstage-go"]'), matrix.preset) && !(matrix.os == 'macos-latest' && contains(fromJSON('["cpp","kitchen-sink","backstage-kitchen-sink"]'), matrix.preset)) }}
         working-directory: ${{ env.WS }}
-        run: aspect lint --task:name lint-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false -- //...
+        run: aspect lint --task:name lint-${{ matrix.preset }}-${{ runner.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false -- //...
 
       # format runs for every preset with a wired source formatter. scala/ruby
       # have none; minimal has no languages (buildifier covers its Starlark).
       - name: Format (no changes expected)
         if: ${{ !contains(fromJSON('["minimal","scala","ruby","swift"]'), matrix.preset) }}
         working-directory: ${{ env.WS }}
-        run: aspect format --task:name format-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --scope=all
+        run: aspect format --task:name format-${{ matrix.preset }}-${{ runner.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --scope=all
 
       # delivery runs for presets whose stamped CI has a delivery job (oci/stamp).
       # --track-state=false --mode=always mirrors the stamped delivery job.
@@ -209,7 +209,7 @@ jobs:
         # The stamped starter job caps this at 20 minutes too; a healthy run takes
         # seconds, so a hang is always an outage, never slow work.
         timeout-minutes: 20
-        run: aspect delivery --task:name delivery-${{ matrix.preset }}-${{ matrix.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --track-state=false --mode=always
+        run: aspect delivery --task:name delivery-${{ matrix.preset }}-${{ runner.os }} --github-status-comments:enabled=false --github-status-checks:enabled=false --track-state=false --mode=always
 
       # Execute the preset's user story — an executable-Markdown tutorial that
       # builds/tests/extends the generated project. Run with `sh` (the ~~~ alias

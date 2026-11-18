@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.3 (2026-11-18)
+
+## What's Changed
+* ci(deliver): serialise starter deliveries per preset with a concurrency group by @ipv1337 in https://github.com/VitruvianSoftware/aspect-workflows-template/pull/56
+* fix(sync): reconnect with upstream by merge, port upstream to f595cf0, add the weekly sync brief by @ipv1337 in https://github.com/VitruvianSoftware/aspect-workflows-template/pull/57
+* chore(release): write release notes from merged PRs, not commits by @ipv1337 in https://github.com/VitruvianSoftware/aspect-workflows-template/pull/59
+
+
+**Full Changelog**: https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v3.0.2...v3.0.3
+
 ## [3.0.2](https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v3.0.1...v3.0.2) (2026-10-11)
 
 

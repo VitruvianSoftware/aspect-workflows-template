@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   tagger:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # `%G.%-V` = ISO week-year + ISO week, with no leading zero on the week so
       # the tag matches workspace_status.sh's `git describe --match` globs.

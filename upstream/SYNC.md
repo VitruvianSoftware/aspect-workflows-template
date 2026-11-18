@@ -118,8 +118,8 @@ repositories.
    - every starter's `CI` on its new `main` head is green
      (`gh run list --repo VitruvianSoftware/<preset> --commit <sha> --workflow CI`
      for each preset in `deliver.yaml`).
-   If release-please opens or updates a release PR, check its changelog lists
-   only our own change, then report it. **Do not merge it.**
+   If release-please opens or updates a release PR, check its version bump and
+   that its notes list only our own PRs, then report it. **Do not merge it.**
 9. Report: the PR merged, the upstream SHA the fork is caught up with, every
    upstream change resolved to ours and why, and anything James must decide.
 
@@ -132,11 +132,18 @@ repositories.
   swift, kitchen-sink) failed. If an upstream merge brings `ubuntu-latest`
   back, resolve it to our pin. Move the pin deliberately, after the toolchains
   run on the new image.
-- **release-please reads merged-in upstream commits as ours.** A dry run of
-  the reconnect showed upstream's `fix(template): pin Bazel 9.3.1` and its
-  cosmo.zip fix in our next changelog, linked to the wrong `#912` in our repo,
-  though we pin 9.3.2. Every sync PR body therefore ends with a commit
-  override that replaces all of the PR's commits with our own summary:
+- **release-please writes release notes from our merged PRs, not commits**
+  (`"changelog-type": "github"` in `release-please-config.json`). With the
+  default, commit-based notes, the reconnect (#57) produced a 3.0.3 changelog
+  with each of our lines nine times (the override is applied once per commit
+  of a merge-committed PR) and upstream's cosmo.zip fix linked to a
+  non-existent `#912` here (GitHub ties upstream commits to upstream's PRs).
+  GitHub's own notes list only PRs merged into this repository, once each, so
+  upstream cannot leak into them. Do not switch it back.
+
+  The version **bump** is still computed from every commit, upstream's
+  included, so an upstream `feat:` could make a sync a minor release. Keep a
+  commit override at the end of every sync PR body to steer it:
 
   ```
   BEGIN_COMMIT_OVERRIDE
@@ -145,9 +152,9 @@ repositories.
   ```
 
   Use `chore(sync): ...` inside it when nothing reaches the starters. In step 8,
-  check the release PR's changelog shows only that line. If upstream commits
-  still appear, edit the merged sync PR's body and re-run the `release-please`
-  workflow; never merge a release PR with upstream's commits in it.
+  check the release PR's version is the bump you expect (a patch for `fix`,
+  nothing for `chore`) and that its notes list only our PRs. Report anything
+  else to James; never merge a release PR.
 - **Delivery force-pushes all 26 starters on every push to `platform-v2.0`**,
   even a docs-only change. It is serialised per preset (`concurrency`, #56), so
   two close merges are safe, but each one costs about 40 minutes of runners.

@@ -52,12 +52,44 @@ def _populate_skeleton(ctx, out, written):
         copied += 1
     ctx.std.io.stdout.write("  backstage: copied {} files into skeleton/\n".format(copied))
 
+# render-preset clears --out before rendering, and `--out=$HOME` used to delete
+# $HOME (#45). Canonicalize ONCE and refuse any directory whose removal would
+# destroy something that is not a render: the filesystem root, the home
+# directory, and this repository or any directory containing it. Same
+# canonicalize-once rule as render-app (template/tools/initializer/tasks.axl):
+# every spelling of a path (`x/`, `x/.`, `y/../x`, relative) resolves to one
+# value before it is compared or removed. Symlinks are not resolved.
+def _canonical(ctx, path):
+    if not path.startswith("/"):
+        path = ctx.std.env.current_dir() + "/" + path
+    segs = []
+    for s in path.split("/"):
+        if s == "" or s == ".":
+            continue
+        if s == "..":
+            if segs:
+                segs.pop()
+            continue
+        segs.append(s)
+    return "/" + "/".join(segs)
+
+def _safe_out(ctx, raw, repo_dir):
+    out = _canonical(ctx, raw)
+    if out == "/":
+        fail("--out={!r} resolves to the filesystem root, which render-preset would delete; pass a fresh directory".format(raw))
+    home = ctx.std.env.var("HOME") or ""
+    if home and out == _canonical(ctx, home):
+        fail("--out={!r} resolves to the home directory, which render-preset would delete; pass a fresh directory".format(raw))
+    repo = _canonical(ctx, repo_dir)
+    if repo == out or repo.startswith(out + "/"):
+        fail("--out={!r} resolves to {}, which is or contains this repository; render-preset would delete it. Pass a directory outside the checkout".format(raw, out))
+    return out
+
 def _impl(ctx):
     repo_dir = ctx.std.env.current_dir()
     config = load_config(ctx, repo_dir)
 
     preset = ctx.args.preset
-    out = ctx.args.out
     name = ctx.args.name
 
     flags = dict(preset_flags(config, preset))
@@ -67,6 +99,9 @@ def _impl(ctx):
     flags["license"] = ctx.args.license != "none"
     template_dir = repo_dir + "/template"
 
+    # --out is DELETED before rendering, so it is canonicalized once here and
+    # only `out` (never the raw argument) is used below; see _safe_out.
+    out = _safe_out(ctx, ctx.args.out, repo_dir)
     if ctx.std.fs.exists(out):
         ctx.std.fs.remove_dir_all(out)
     ctx.std.fs.create_dir_all(out)
@@ -87,7 +122,7 @@ render_preset = task(
     implementation = _impl,
     args = {
         "preset": args.string(required = True, description = "Preset to render (see template-config.json)"),
-        "out": args.string(required = True, description = "Output directory (cleared if it exists)"),
+        "out": args.string(required = True, description = "Output directory; deleted and recreated. Refuses /, $HOME and this checkout or any directory containing it"),
         "name": args.string(default = "my_project", description = "Project name (snake_case)"),
         "license": args.string(default = "none", values = ["Apache-2.0", "none"], description = "License to scaffold; defaults to 'none'. Pass 'Apache-2.0' to include it."),
     },

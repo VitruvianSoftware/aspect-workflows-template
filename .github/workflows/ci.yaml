@@ -448,6 +448,37 @@ jobs:
             echo "refused and host intact: --out='$spelling'"
           done
 
+      # Same data-loss class in render-preset (#45): it deletes --out before
+      # rendering, and `--out=$HOME` used to delete $HOME. Every spelling of the
+      # filesystem root, the home directory and this checkout (or a directory
+      # containing it) must refuse, and all of them must survive. HOME points at
+      # a throwaway directory so a regression deletes that, not the runner's.
+      # `/` is only ever tried here, on a disposable runner.
+      - name: Refuse to render-preset over /, $HOME or the checkout
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE"
+          fake_home="$RUNNER_TEMP/fakehome"
+          mkdir -p "$fake_home" && echo "DO-NOT-DELETE" > "$fake_home/KEEPFILE"
+          for spelling in / /. /tmp/.. "$fake_home" "$fake_home/" "$fake_home/x/.." \
+                          "$GITHUB_WORKSPACE" . ./ template/.. ..; do
+            if HOME="$fake_home" aspect render-preset --preset=minimal --name=my_project \
+                 --out="$spelling" > "$RUNNER_TEMP/preset-refusal.log" 2>&1; then
+              echo "--out='$spelling' was ACCEPTED; render-preset must refuse it."
+              exit 1
+            fi
+            if ! grep -qE -- "resolves to (the filesystem root|the home directory|.*which is or contains this repository)" "$RUNNER_TEMP/preset-refusal.log"; then
+              echo "--out='$spelling' failed, but not with the refusal:"
+              cat "$RUNNER_TEMP/preset-refusal.log"
+              exit 1
+            fi
+            if [ "$(cat "$fake_home/KEEPFILE" 2>/dev/null)" != "DO-NOT-DELETE" ] || [ ! -f "$GITHUB_WORKSPACE/dev.axl" ]; then
+              echo "--out='$spelling' refused but still deleted something."
+              exit 1
+            fi
+            echo "refused, nothing deleted: --out='$spelling'"
+          done
+
       # The P1 calling convention, exercised in exactly the shape a frontend
       # will use it: CLONE THE TARGET REPO, RUN ITS ENGINE, render to a scratch
       # directory, open a PR. So the working directory is a starter (that is

@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.4 (2026-11-18)
+
+## What's Changed
+* fix(dev): refuse to render-preset over /, $HOME or the checkout by @ipv1337 in https://github.com/VitruvianSoftware/aspect-workflows-template/pull/60
+
+
+**Full Changelog**: https://github.com/VitruvianSoftware/aspect-workflows-template/compare/v3.0.3...v3.0.4
+
 ## 3.0.3 (2026-11-18)
 
 ## What's Changed
